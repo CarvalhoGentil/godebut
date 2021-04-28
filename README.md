@@ -1,2 +1,2 @@
 # godebut
-Teste de container GO
+Projeto para teste de container GO rodando no sistema WSL.
