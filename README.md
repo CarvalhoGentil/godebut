@@ -3,7 +3,8 @@
 
 #### Endpoints:
 - "/"
-- "/about"
+- "/aproposde"
+- "/listertoutescachacas"
 
 #### Ambiente Stack
 O projeto deve ser executado em um ambiente com docker swarm ativo 
@@ -11,3 +12,6 @@ O projeto deve ser executado em um ambiente com docker swarm ativo
 
 O compose deve ser iniciado va stack.
 >**`docker stack deploy -c docker-compose.yml`**
+
+Buscar endpoints na maquina
+>**`localhost:8085`**
