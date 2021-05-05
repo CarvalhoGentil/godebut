@@ -1,7 +1,7 @@
 FROM golang:latest
 
 RUN mkdir /build
-COPY . /build
+COPY ./main/ /build/main
 
 WORKDIR /build/main
 
