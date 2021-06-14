@@ -1,15 +1,11 @@
 FROM golang:latest
 
-RUN mkdir /build
-COPY ./main/ /build/main
+WORKDIR /
+COPY ./main/main.go /
 
-WORKDIR /build/main
-
-RUN export GO111MODULE=on
-RUN go get github.com/gorilla/mux
 RUN go mod init main
-RUN go build
+RUN go get github.com/gorilla/mux
 
 EXPOSE 8085
 
-ENTRYPOINT [ "/build/main/main" ]
+CMD ["go","run","main.go"]

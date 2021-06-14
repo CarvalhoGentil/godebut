@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
+	fmt.Println("Iniciando alambique em http://localhost:8085 ")
 	Cachacas = []Cachaca{
 		{Nome: "51", Volume: "974ml", Custo: "8"},
 		{Nome: "Matuta", Volume: "1000ml", Custo: "25"},
@@ -16,24 +19,23 @@ func main() {
 }
 
 // pageInitial (Home Page) função para mostrar uma home page qualquer
-func pageInitial(response http.ResponseWriter, r *http.Request) {
+func pageInitial(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpont: homePage")
 
-	fmt.Fprint(response, "2ez4Flz")
-	fmt.Println("Bem vindo ao Go Web API")
+	fmt.Fprintln(w, "-- 2ez4Flz --")
+	fmt.Fprint(w, "Go Drink")
 }
 
 // aProposDe (About) é para mostrar minhas informações
-func aProposDe(response http.ResponseWriter, r *http.Request) {
+func aProposDe(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpont: about")
 
 	qui := "Felix Neto"
 
-	fmt.Fprint(response, "A propos de...", qui)
-	fmt.Println("Meu nome: ", qui)
+	fmt.Fprint(w, "A propos de...", qui)
 }
 
-// listaCachacas é o endpoint para listar todas as cachaças cadastradas
+// listerToutesCachacas é o endpoint para listar todas as cachaças cadastradas
 func listerToutesCachacas(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: listerToutesCachacas")
 
@@ -43,16 +45,13 @@ func listerToutesCachacas(w http.ResponseWriter, r *http.Request) {
 // debut1 é a função que vai chamar as paginas
 func debut1() {
 
-	// roteur := mux.NewRouter().StrictSlash(true)
+	roteur := mux.NewRouter().StrictSlash(true)
 
-	http.HandleFunc("/", pageInitial)
-	http.HandleFunc("/aproposde", aProposDe)
-	http.HandleFunc("/listertoutescachacas", listerToutesCachacas)
-	// roteur.HandleFunc("/", pageInitial)
-	// roteur.HandleFunc("/aproposde", aProposDe)
-	// roteur.HandleFunc("/listertoutescachacas", listerToutesCachacas)
+	roteur.HandleFunc("/", pageInitial)
+	roteur.HandleFunc("/aproposde", aProposDe)
+	roteur.HandleFunc("/listertoutescachacas", listerToutesCachacas)
 
-	log.Fatal(http.ListenAndServe(":8085", nil))
+	log.Fatal(http.ListenAndServe(":8085", roteur))
 }
 
 // Cachaca é a estrutura base para o ojeto cachaça
