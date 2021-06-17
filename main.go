@@ -13,8 +13,8 @@ import (
 func main() {
 	fmt.Println("Iniciando alambique em http://localhost:8085 ")
 	Cachacas = []Cachaca{
-		Cachaca{Nome: "51", Volume: "974ml", Custo: "8"},
-		Cachaca{Nome: "Matuta", Volume: "1000ml", Custo: "30"},
+		Cachaca{Id: "0", Nome: "51", Volume: "974ml", Custo: "8"},
+		Cachaca{Id: "1", Nome: "Matuta", Volume: "1000ml", Custo: "30"},
 	}
 	debut1()
 }
@@ -81,6 +81,7 @@ func debut1() {
 
 // Cachaca é a estrutura base para o ojeto cachaça
 type Cachaca struct {
+	Id     string `json:"id"`
 	Nome   string `json:"nome"`
 	Volume string `json:"volume"`
 	Custo  string `json:"custo"`
