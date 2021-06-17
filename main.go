@@ -40,7 +40,6 @@ func aProposDe(w http.ResponseWriter, r *http.Request) {
 // listerToutesCachacas é o endpoint para listar todas as cachaças cadastradas
 func listerToutesCachacas(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: listerToutesCachacas")
-	fmt.Println(Cachacas)
 	json.NewEncoder(w).Encode(Cachacas)
 }
 
@@ -51,8 +50,6 @@ func listerUneCachaca(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	cle := vars["nome"]
 	cachacaencontra := false
-
-	// fmt.Fprintf(w, "Nome selecionado: "+cle)
 
 	for _, cachaca := range Cachacas {
 		if strings.ToLower(cachaca.Nome) == strings.ToLower(cle) {
