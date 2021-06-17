@@ -11,7 +11,7 @@
 O projeto deve ser executado em um ambiente com docker swarm ativo 
 >**`docker swarm init`**
 
-O compose deve ser iniciado va stack.
+O compose deve ser iniciado via stack.
 >**`docker stack deploy -c docker-compose.yml`**
 
 Buscar endpoints na porta 8085 do servidor
