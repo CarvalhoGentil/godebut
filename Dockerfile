@@ -1,7 +1,7 @@
 FROM golang:latest
 
 WORKDIR /
-COPY ./main/main.go /
+COPY main.go /
 
 RUN go mod init main
 RUN go get github.com/gorilla/mux
