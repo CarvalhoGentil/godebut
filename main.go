@@ -24,6 +24,7 @@ func main() {
 func pageInitial(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: pageInitial")
 
+	fmt.Fprintln(w, "- ......... -")
 	fmt.Fprintln(w, "-- 2ez4Flz --")
 	fmt.Fprintln(w, "-  GoDrink  -")
 	fmt.Fprintln(w, "- ......... -")
@@ -52,6 +53,7 @@ func listerUneCachaca(w http.ResponseWriter, r *http.Request) {
 	cle := vars["nome"]
 	cachacaencontra := false
 
+	// Buscar na lista de cachacas o nome informado
 	for _, cachaca := range Cachacas {
 		if strings.ToLower(cachaca.Nome) == strings.ToLower(cle) {
 			cachacaencontra = true
@@ -69,7 +71,19 @@ func creerNouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: creerNouvelleCachaca")
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
-	fmt.Fprint(w, "%+v", string(reqBody))
+	var cachaca Cachaca
+
+	json.Unmarshal(reqBody, &cachaca)
+
+	// Validar dados basicos antes de adicionar
+	if cachaca.Id != "" && cachaca.Nome != "" {
+		Cachacas = append(Cachacas, cachaca)
+
+		json.NewEncoder(w).Encode(cachaca)
+
+	} else {
+		fmt.Fprintln(w, "Os dados de ID e NOME devem ser preenchidos !")
+	}
 
 }
 

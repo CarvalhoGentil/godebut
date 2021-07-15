@@ -21,13 +21,15 @@ echo "Iniciando BUILD da imagem..."
 echo $HASH
 echo " "
 
-docker build -t ffelixneto/godebut:latest .
+docker build --no-cache -t ffelixneto/godebut:latest .
 
 echo $HASH
 echo "Iniciando o serviço GoDebut..."
 echo $HASH
 echo " "
 
+docker stack rm godebut
+sleep 5
 docker stack deploy godebut -c docker-compose.yml
 
 sleep 3
