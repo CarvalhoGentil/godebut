@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -16,7 +17,7 @@ func main() {
 		Cachaca{Id: "0", Nome: "51", Volume: "974ml", Custo: "8"},
 		Cachaca{Id: "1", Nome: "Matuta", Volume: "1000ml", Custo: "30"},
 	}
-	debut1()
+	debut()
 }
 
 // pageInitial (Home Page) função para mostrar uma home page qualquer
@@ -24,8 +25,8 @@ func pageInitial(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: pageInitial")
 
 	fmt.Fprintln(w, "-- 2ez4Flz --")
-	fmt.Fprint(w, "-  GoDrink  -")
-	fmt.Fprint(w, "- - - - - - -")
+	fmt.Fprintln(w, "-  GoDrink  -")
+	fmt.Fprintln(w, "- ......... -")
 }
 
 // aProposDe (About) é para mostrar minhas informações
@@ -63,20 +64,33 @@ func listerUneCachaca(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// debut1 é a função que vai ativar as rotas
-func debut1() {
+// creerNouvelleCachaca é o endpoint para criar novos registros de cachaca
+func creerNouvelleCachaca(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint: creerNouvelleCachaca")
+
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	fmt.Fprint(w, "%+v", string(reqBody))
+
+}
+
+// debut é a função que vai ativar as rotas
+func debut() {
 
 	roteur := mux.NewRouter().StrictSlash(true)
 
+	// Rotas de visualizaçõ
 	roteur.HandleFunc("/", pageInitial)
 	roteur.HandleFunc("/aproposde", aProposDe)
+
+	// Rotas de endpoits do CRUD
 	roteur.HandleFunc("/listertoutescachacas", listerToutesCachacas)
+	roteur.HandleFunc("/creernouvellecachaca", creerNouvelleCachaca).Methods("POST")
 	roteur.HandleFunc("/listerunecachaca/{nome}", listerUneCachaca)
 
 	log.Fatal(http.ListenAndServe(":8085", roteur))
 }
 
-// Cachaca é a estrutura base para o ojeto cachaça
+// Cachaca é a estrutura base para o projeto cachaça
 type Cachaca struct {
 	Id     string `json:"id"`
 	Nome   string `json:"nome"`

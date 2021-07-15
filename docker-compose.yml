@@ -2,7 +2,7 @@ version: '3.9'
 
 services: 
     api:
-        image: ffelixneto/godebut:1.0.23
+        image: ffelixneto/godebut:latest
         ports:
             - 8085:8085
         deploy:
