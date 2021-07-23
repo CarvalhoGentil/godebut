@@ -2,10 +2,23 @@
  Projeto para teste de container GO rodando no sistema WSL.
 
 #### Endpoints:
-- "/"
-- "/aproposde"
-- "/listertoutescachacas"
-- "/listerunecachaca/{nome}"
+#####`"/"`
+Home Page
+
+#####`"/aproposde"`
+Sobre mim
+
+#####`"/toutescachacas"`
+Lista todas as cachaças cadastradas*
+
+#####`GET "/unecachaca/{nome}"`
+Busca uma cachaça por nome
+
+#####`POST "/unecachaca"`
+Cadastrar uma nova cachaça com dados repassados
+
+#####`DELETE "/unecachaca/{nome}"`
+Remover uma cachaça da lista pelo nome
 
 #### Ambiente Stack
 O projeto deve ser executado em um ambiente com docker swarm ativo 
