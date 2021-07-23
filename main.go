@@ -39,15 +39,15 @@ func aProposDe(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "A propos de...", qui)
 }
 
-// listerToutesCachacas é o endpoint para listar todas as cachaças cadastradas
-func listerToutesCachacas(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Endpoint: listerToutesCachacas")
+// toutesCachacas é o endpoint para listar todas as cachaças cadastradas
+func toutesCachacas(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint: toutesCachacas")
 	json.NewEncoder(w).Encode(Cachacas)
 }
 
-// listerUneCachaca é o endpoint para listar uma cachaça buscando pelo nome informado na URL
-func listerUneCachaca(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Endpoint: listerUneCachaca")
+// uneCachaca é o endpoint para listar uma cachaça buscando pelo nome informado na URL
+func uneCachaca(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint: uneCachaca")
 
 	vars := mux.Vars(r)
 	cle := vars["nome"]
@@ -62,13 +62,13 @@ func listerUneCachaca(w http.ResponseWriter, r *http.Request) {
 	}
 	// Mensagem padrao para consulta vazia
 	if cachacaencontra != true {
-		fmt.Fprintf(w, "Nehuma cachaca encontrada com o nome: \""+cle+"\"")
+		fmt.Fprintln(w, "Nehuma cachaca encontrada com o nome: \""+cle+"\"")
 	}
 }
 
-// creerNouvelleCachaca é o endpoint para criar novos registros de cachaca
-func creerNouvelleCachaca(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Endpoint: creerNouvelleCachaca")
+// nouvelleCachaca é o endpoint para criar novos registros de cachaca
+func nouvelleCachaca(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint: nouvelleCachaca")
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var cachaca Cachaca
@@ -78,13 +78,36 @@ func creerNouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 	// Validar dados basicos antes de adicionar
 	if cachaca.Id != "" && cachaca.Nome != "" {
 		Cachacas = append(Cachacas, cachaca)
+		fmt.Fprintln(w, "A cachaca \""+cachaca.Nome+"\" foi adicionada a lista.")
 
 		json.NewEncoder(w).Encode(cachaca)
 
 	} else {
 		fmt.Fprintln(w, "Os dados de ID e NOME devem ser preenchidos !")
 	}
+}
 
+// effacerCachaca é o endpoint para deletar
+func effacerCachaca(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	cle := vars["nome"]
+	cachacaencontra := false
+
+	// Buscar na lista de cachacas o nome informado
+	for index, cachaca := range Cachacas {
+		if strings.ToLower(cachaca.Nome) == strings.ToLower(cle) {
+			cachacaencontra = true
+
+			// Remover a cachaca informada da lista
+			Cachacas = append(Cachacas[:index], Cachacas[index+1:]...)
+
+			fmt.Fprintln(w, "A cachaca \""+cle+"\" foi removida da lista.")
+		}
+	}
+	// Mensagem padrão para consula vazia
+	if cachacaencontra != true {
+		fmt.Fprintln(w, "Nehuma cachaca encontrada com o nome: \""+cle+"\"")
+	}
 }
 
 // debut é a função que vai ativar as rotas
@@ -92,14 +115,15 @@ func debut() {
 
 	roteur := mux.NewRouter().StrictSlash(true)
 
-	// Rotas de visualizaçõ
+	// Rotas de visualização
 	roteur.HandleFunc("/", pageInitial)
 	roteur.HandleFunc("/aproposde", aProposDe)
 
-	// Rotas de endpoits do CRUD
-	roteur.HandleFunc("/listertoutescachacas", listerToutesCachacas)
-	roteur.HandleFunc("/creernouvellecachaca", creerNouvelleCachaca).Methods("POST")
-	roteur.HandleFunc("/listerunecachaca/{nome}", listerUneCachaca)
+	// Rotas de endpoints do CRUD
+	roteur.HandleFunc("/toutescachacas", toutesCachacas)
+	roteur.HandleFunc("/unecachaca", nouvelleCachaca).Methods("POST")
+	roteur.HandleFunc("/unecachaca/{nome}", effacerCachaca).Methods("DELETE")
+	roteur.HandleFunc("/unecachaca/{nome}", uneCachaca)
 
 	log.Fatal(http.ListenAndServe(":8085", roteur))
 }
