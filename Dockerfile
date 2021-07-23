@@ -1,11 +1,17 @@
-FROM golang:latest
+FROM golang:latest AS builder
 
-WORKDIR /
-COPY main.go /
+RUN mkdir /app
+COPY main.go /app
+WORKDIR /app
 
 RUN go mod init main
 RUN go get github.com/gorilla/mux
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./...
 
+
+FROM alpine:latest AS production
+COPY --from=builder /app .
 EXPOSE 8085
 
-CMD ["go","run","main.go"]
+# CMD ["go","run","main.go"]
+CMD ["./main"]
