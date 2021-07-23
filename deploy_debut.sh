@@ -29,10 +29,10 @@ echo $HASH
 echo " "
 
 docker stack rm godebut
-sleep 5
+sleep 6
 docker stack deploy godebut -c docker-compose.yml
 
-sleep 3
+sleep 2
 
 echo $HASH
 echo "GoDebut deploy finalizado !"
