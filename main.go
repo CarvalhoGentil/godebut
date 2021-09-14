@@ -87,8 +87,44 @@ func nouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// renouvelleCachaca ó o endpoint para aualizar um registro de cachaca
+func renouvelleCachaca(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint: renouvelerCachaca")
+
+	vars := mux.Vars(r)
+	cle := vars["id"]
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	var cachaca Cachaca
+
+	json.Unmarshal(reqBody, &cachaca)
+
+	cachacaencontra := false
+
+	if cle != "" {
+		// Buscar na lista de cachacas o Id informado
+		for index, cachaca := range Cachacas {
+			if strings.ToLower(cachaca.Id) == strings.ToLower(cle) {
+				cachacaencontra = true
+
+				// Atualizar informações da cachaca na lista
+				Cachacas[index] = cachaca
+
+				fmt.Fprintln(w, "A cachaca com Id \""+cle+"\" foi aualizada.")
+			}
+		}
+		// Mensagem padrão para consula vazia
+		if cachacaencontra != true {
+			fmt.Fprintln(w, "Nehuma cachaca encontrada com o id: \""+cle+"\"")
+		}
+	} else {
+		fmt.Fprintln(w, "Os dados de ID deve ser preenchido !")
+	}
+}
+
 // effacerCachaca é o endpoint para deletar
 func effacerCachaca(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint: effacerCachaca")
+
 	vars := mux.Vars(r)
 	cle := vars["nome"]
 	cachacaencontra := false
@@ -122,6 +158,7 @@ func debut() {
 	// Rotas de endpoints do CRUD
 	roteur.HandleFunc("/toutescachacas", toutesCachacas)
 	roteur.HandleFunc("/unecachaca", nouvelleCachaca).Methods("POST")
+	roteur.HandleFunc("/unecachaca/{id}", renouvelleCachaca).Methods("PUT")
 	roteur.HandleFunc("/unecachaca/{nome}", effacerCachaca).Methods("DELETE")
 	roteur.HandleFunc("/unecachaca/{nome}", uneCachaca)
 
