@@ -10,6 +10,14 @@ clear
 HASH="##############################################"
 
 echo $HASH
+echo "Removendo stack godebut em execução..."
+docker stack rm godebut
+echo $HASH
+echo " "
+
+sleep 6
+
+echo $HASH
 echo "Iniciando PULL do repositorio..."
 echo $HASH
 echo " "
@@ -28,8 +36,6 @@ echo "Iniciando o serviço GoDebut..."
 echo $HASH
 echo " "
 
-docker stack rm godebut
-sleep 6
 docker stack deploy godebut -c docker-compose.yml
 
 sleep 2

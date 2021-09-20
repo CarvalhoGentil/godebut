@@ -62,7 +62,7 @@ func uneCachaca(w http.ResponseWriter, r *http.Request) {
 	}
 	// Mensagem padrao para consulta vazia
 	if cachacaencontra != true {
-		fmt.Fprintln(w, "Nehuma cachaca encontrada com o nome: \""+cle+"\"")
+		fmt.Fprintln(w, "Nenhuma cachaca encontrada com o nome: \""+cle+"\"")
 	}
 }
 
@@ -91,6 +91,8 @@ func nouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 func renouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: renouvelerCachaca")
 
+	fmt.Fprintln(w, "Chegou a request aqui.")
+
 	vars := mux.Vars(r)
 	cle := vars["id"]
 	reqBody, _ := ioutil.ReadAll(r.Body)
@@ -114,7 +116,7 @@ func renouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 		}
 		// Mensagem padrão para consula vazia
 		if cachacaencontra != true {
-			fmt.Fprintln(w, "Nehuma cachaca encontrada com o id: \""+cle+"\"")
+			fmt.Fprintln(w, "Nenhuma cachaca encontrada com o Id: \""+cle+"\"")
 		}
 	} else {
 		fmt.Fprintln(w, "Os dados de ID deve ser preenchido !")
@@ -142,7 +144,7 @@ func effacerCachaca(w http.ResponseWriter, r *http.Request) {
 	}
 	// Mensagem padrão para consula vazia
 	if cachacaencontra != true {
-		fmt.Fprintln(w, "Nehuma cachaca encontrada com o nome: \""+cle+"\"")
+		fmt.Fprintln(w, "Nenhuma cachaca encontrada com o nome: \""+cle+"\"")
 	}
 }
 
