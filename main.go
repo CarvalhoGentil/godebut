@@ -94,9 +94,9 @@ func renouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	cle := vars["id"]
 	reqBody, _ := ioutil.ReadAll(r.Body)
-	var cachaca Cachaca
+	var update_cachaca Cachaca
 
-	json.Unmarshal(reqBody, &cachaca)
+	json.Unmarshal(reqBody, &update_cachaca)
 
 	cachacaencontra := false
 
@@ -107,7 +107,7 @@ func renouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 				cachacaencontra = true
 
 				// Atualizar informações da cachaca na lista
-				Cachacas[index] = cachaca
+				Cachacas[index] = update_cachaca
 
 				fmt.Fprintln(w, "A cachaca com Id \""+cle+"\" foi aualizada.")
 			}
