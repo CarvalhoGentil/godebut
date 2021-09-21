@@ -1,8 +1,10 @@
 #!/bin/bash
 
 # Script segue os seguintes passos:
+# - Remover o serviço do "GoDebut"
 # - Atualizar o repsitorio local
 # - Fazer o build do container 
+# - Fazer o push do container para o Docker hub 
 # - Startar o serviço do "GoDebut"
 
 clear
@@ -32,6 +34,15 @@ echo " "
 docker build --no-cache -t ffelixneto/godebut:latest .
 
 echo $HASH
+echo "Fazendo Push da imagem para Docker Hub..."
+echo $HASH
+echo " "
+
+docker push ffelixneto/godebut:latest
+
+sleep 2
+
+echo $HASH
 echo "Iniciando o serviço GoDebut..."
 echo $HASH
 echo " "
@@ -44,4 +55,3 @@ echo $HASH
 echo "GoDebut deploy finalizado !"
 echo $HASH
 echo " "
-

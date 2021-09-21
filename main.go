@@ -91,8 +91,6 @@ func nouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 func renouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: renouvelerCachaca")
 
-	fmt.Fprintln(w, "Chegou a request aqui.")
-
 	vars := mux.Vars(r)
 	cle := vars["id"]
 	reqBody, _ := ioutil.ReadAll(r.Body)
