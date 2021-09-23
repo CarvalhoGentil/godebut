@@ -1,12 +1,10 @@
 name: Publicar Docker Image
 
-on:
-  release:
-    types: [published]
+on: [push]
 
 jobs:
   push_dockerhub:
-    name: Push Docker image para o Docker Hub
+    name: Build e Push de imagem para o Docker Hub
     runs-on: ubuntu-latest
     steps:
       - name: Selecionar reositorio
