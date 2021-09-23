@@ -10,19 +10,19 @@ Home Page
 ##### `"/aproposde"`
 Sobre mim
 
-##### `"/toutescachacas"`
+##### `GET "/v1/toutescachacas"`
 Lista todas as cachaças cadastradas*
 
-##### `GET "/unecachaca/{nome}"`
+##### `GET "/v1/unecachaca/{nome}"`
 Busca uma cachaça por nome
 
-##### `POST "/unecachaca"`
+##### `POST "/v1/unecachaca"`
 Cadastrar uma nova cachaça com dados repassados
 
-##### `DELETE "/unecachaca/{nome}"`
+##### `DELETE "/v1/unecachaca/{nome}"`
 Remover uma cachaça da lista pelo nome
 
-##### `PUT "/unecachaca/{id}"`
+##### `PUT "/v1/unecachaca/{id}"`
 Atualizar os dados de uma cachaça da lista pelo id
 
 #### Ambiente Stack
