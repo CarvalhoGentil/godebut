@@ -7,7 +7,7 @@ jobs:
     name: Build e Push de imagem para o Docker Hub
     runs-on: ubuntu-latest
     steps:
-      - name: Selecionar reositorio
+      - name: Selecionar repositorio
         uses: actions/checkout@v2
       
       - name: Login Docker Hub
@@ -27,5 +27,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: latest
           labels: ${{ steps.meta.outputs.labels }}

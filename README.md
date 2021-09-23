@@ -1,6 +1,8 @@
 # GoDebut
  Projeto para teste de container GO rodando no sistema WSL.
 
+![Pipeline Status](https://github.com/ffelixneto/godebut/actions/workflows/build-push-docker.yml/badge.svg) 
+
 #### Endpoints:
 ##### `"/"`
 Home Page
@@ -19,6 +21,9 @@ Cadastrar uma nova cachaça com dados repassados
 
 ##### `DELETE "/unecachaca/{nome}"`
 Remover uma cachaça da lista pelo nome
+
+##### `PUT "/unecachaca/{id}"`
+Atualizar os dados de uma cachaça da lista pelo id
 
 #### Ambiente Stack
 O projeto deve ser executado em um ambiente com docker swarm ativo 

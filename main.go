@@ -156,11 +156,11 @@ func debut() {
 	roteur.HandleFunc("/aproposde", aProposDe)
 
 	// Rotas de endpoints do CRUD
-	roteur.HandleFunc("/toutescachacas", toutesCachacas)
-	roteur.HandleFunc("/unecachaca", nouvelleCachaca).Methods("POST")
-	roteur.HandleFunc("/unecachaca/{id}", renouvelleCachaca).Methods("PUT")
-	roteur.HandleFunc("/unecachaca/{nome}", effacerCachaca).Methods("DELETE")
-	roteur.HandleFunc("/unecachaca/{nome}", uneCachaca)
+	roteur.HandleFunc("/v1/toutescachacas", toutesCachacas)
+	roteur.HandleFunc("/v1/unecachaca", nouvelleCachaca).Methods("POST")
+	roteur.HandleFunc("/v1/unecachaca/{id}", renouvelleCachaca).Methods("PUT")
+	roteur.HandleFunc("/v1/unecachaca/{nome}", effacerCachaca).Methods("DELETE")
+	roteur.HandleFunc("/v1/unecachaca/{nome}", uneCachaca)
 
 	log.Fatal(http.ListenAndServe(":8085", roteur))
 }
