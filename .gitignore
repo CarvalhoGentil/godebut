@@ -13,3 +13,7 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# Exclusões de arquivos de ambiente de execução
+*go.mod
+*go.sum
