@@ -25,8 +25,10 @@ func pageInitial(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: pageInitial")
 
 	fmt.Fprintln(w, "- ......... -")
+	fmt.Fprintln(w, "- ......... -")
 	fmt.Fprintln(w, "-- 2ez4Flz --")
 	fmt.Fprintln(w, "-  GoDrink  -")
+	fmt.Fprintln(w, "- ......... -")
 	fmt.Fprintln(w, "- ......... -")
 }
 
