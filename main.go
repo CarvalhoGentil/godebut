@@ -14,8 +14,8 @@ import (
 func main() {
 	fmt.Println("Iniciando alambique em http://localhost:8085 ")
 	Cachacas = []Cachaca{
-		Cachaca{Id: "0", Nome: "51", Volume: "974ml", Custo: "8"},
-		Cachaca{Id: "1", Nome: "Matuta", Volume: "1000ml", Custo: "30"},
+		{Id: "0", Nome: "51", Volume: "974ml", Custo: "8"},
+		{Id: "1", Nome: "Matuta", Volume: "1000ml", Custo: "30"},
 	}
 	debut()
 }
