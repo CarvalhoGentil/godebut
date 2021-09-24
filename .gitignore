@@ -17,3 +17,4 @@
 # Exclusões de arquivos de ambiente de execução
 *go.mod
 *go.sum
+pgdata

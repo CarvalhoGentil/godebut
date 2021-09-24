@@ -20,3 +20,40 @@ services:
                 limits:
                     cpus: '0.30'
                     memory: 100M
+    db:
+        image: postgres
+        secrets:
+            - dbuser
+            - dbpass
+            - dbname
+        ports:
+            - 5545:5432
+        environment:
+            POSTGRES_USER_FILE: /run/secrets/dbuser
+            POSTGRES_PASSWORD_FILE: /run/secrets/dbpass
+            POSTGRES_DB_FILE: /run/secrets/dbname
+        volumes:
+            - ./pgdata:/var/lib/postgresql/data
+        deploy:
+            mode: replicated
+            replicas: 1
+            restart_policy:
+                condition: on-failure
+                delay: 5s
+                max_attempts: 3
+                window: 120s
+            resources:
+                reservations:
+                    cpus: '0.20'
+                    memory: 50M
+                limits:
+                    cpus: '0.30'
+                    memory: 100M
+
+secrets:
+    dbuser:
+        external: true
+    dbpass:
+        external: true
+    dbname:
+        external: true

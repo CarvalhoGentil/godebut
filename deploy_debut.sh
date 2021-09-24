@@ -9,49 +9,49 @@
 
 clear
 
-HASH="##############################################"
+HASHLINE="##############################################"
 
-echo $HASH
+echo $HASHLINE
 echo "Removendo stack godebut em execução..."
 docker stack rm godebut
-echo $HASH
+echo $HASHLINE
 echo " "
 
 sleep 6
 
-echo $HASH
+echo $HASHLINE
 echo "Iniciando PULL do repositorio..."
-echo $HASH
+echo $HASHLINE
 echo " "
 
 git pull
 
-echo $HASH
+echo $HASHLINE
 echo "Iniciando BUILD da imagem..."
-echo $HASH
+echo $HASHLINE
 echo " "
 
 docker build --no-cache -t ffelixneto/godebut:latest .
 
-echo $HASH
+echo $HASHLINE
 echo "Fazendo Push da imagem para Docker Hub..."
-echo $HASH
+echo $HASHLINE
 echo " "
 
 docker push ffelixneto/godebut:latest
 
 sleep 2
 
-echo $HASH
+echo $HASHLINE
 echo "Iniciando o serviço GoDebut..."
-echo $HASH
+echo $HASHLINE
 echo " "
 
 docker stack deploy godebut -c docker-compose.yml
 
 sleep 2
 
-echo $HASH
+echo $HASHLINE
 echo "GoDebut deploy finalizado !"
-echo $HASH
+echo $HASHLINE
 echo " "
