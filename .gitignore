@@ -17,4 +17,6 @@
 # Exclusões de arquivos de ambiente de execução
 *go.mod
 *go.sum
+mydbsecrets/*
+config/*.json
 pgdata
