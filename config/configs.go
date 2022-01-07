@@ -22,6 +22,8 @@ func main() {
 }
 
 func return_struct(user string, name string, pass string) MyInterface {
+	// Validar esse retorno como no exemplo
+	// https://play.golang.org/p/tHbTZHEQZ-L
 	return &Configuration{
 		Dbuser: user,
 		Dbname: name,
@@ -35,14 +37,14 @@ func start_config() {
 	my_config_path, _ = filepath.Abs("config.prod.json")
 	fmt.Println(my_config_path)
 
-	my_config := Configuration{}
+	var my_config Configuration
 	err := gonfig.GetConf(my_config_path, &my_config)
 	// err := gonfig.GetConf("/home/felix/cofe/4fun/godebut/config/config.prod.json", &my_config)
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println(my_config.Dbpass)
+	my_config{Dbuser: my_config.Dbuser, my_config.Dbname, my_config.Dbpass}
+	fmt.Println(my_config.Dbpass, my_config.Dbpass, my_config.Dbpass)
 	fmt.Println(my_config)
 	// return my_config.Dbpass
 

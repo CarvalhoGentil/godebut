@@ -9,6 +9,9 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 func main() {
@@ -17,6 +20,9 @@ func main() {
 		{Id: "0", Nome: "51", Volume: "974ml", Custo: "8"},
 		{Id: "1", Nome: "Matuta", Volume: "1000ml", Custo: "30"},
 	}
+
+	initialeMigration()
+
 	debut()
 }
 
@@ -70,6 +76,12 @@ func uneCachaca(w http.ResponseWriter, r *http.Request) {
 func nouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: nouvelleCachaca")
 
+	db, err := gorm.Open("postgres", "host=teste user=teste password=teste dbname=teste port=5432 sslmode=disable")
+	if err != nil {
+		fmt.Println("Erro de conexão ao banco de dados: \"" + err.Error() + "\"")
+	}
+	defer db.Close()
+
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var cachaca Cachaca
 
@@ -78,6 +90,7 @@ func nouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 	// Validar dados basicos antes de adicionar
 	if cachaca.Id != "" && cachaca.Nome != "" {
 		Cachacas = append(Cachacas, cachaca)
+
 		fmt.Fprintln(w, "A cachaca \""+cachaca.Nome+"\" foi adicionada a lista.")
 
 		json.NewEncoder(w).Encode(cachaca)
@@ -146,6 +159,18 @@ func effacerCachaca(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// initialeMigration é a função para executar a migração no banco
+func initialeMigration() {
+	db, err := gorm.Open("postgres", "host=db user=teste password=teste dbname=teste port=5432 sslmode=disable")
+	if err != nil {
+		fmt.Println("Erro de conexão ao banco de dados:")
+		fmt.Println(err.Error())
+	}
+	defer db.Close()
+
+	db.AutoMigrate(&Consumidor{})
+}
+
 // debut é a função que vai ativar as rotas
 func debut() {
 
@@ -171,6 +196,12 @@ type Cachaca struct {
 	Nome   string `json:"nome"`
 	Volume string `json:"volume"`
 	Custo  string `json:"custo"`
+}
+
+type Consumidor struct {
+	gorm.Model
+	Nome  string
+	Idade string
 }
 
 var Cachacas []Cachaca

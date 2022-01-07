@@ -21,6 +21,7 @@ services:
                     cpus: '0.30'
                     memory: 100M
     db:
+        user: "${UID}:${GID}"
         image: postgres
         secrets:
             - dbuser

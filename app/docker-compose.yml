@@ -1,0 +1,48 @@
+version: '3.9'
+
+services: 
+    api:
+        image: ffelixneto/godebut:latest
+        ports:
+            - 8085:8085
+        deploy:
+            mode: replicated
+            replicas: 1
+            restart_policy:
+                condition: on-failure
+                delay: 5s
+                max_attempts: 3
+                window: 120s
+            resources:
+                reservations:
+                    cpus: '0.20'
+                    memory: 50M
+                limits:
+                    cpus: '0.30'
+                    memory: 100M
+    db:
+        image: postgres
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_USER : "teste"
+            POSTGRES_PASSWORD : "teste"
+            POSTGRES_DB : "teste"
+        volumes:
+            - ../pgdata:/var/lib/postgresql/data
+        deploy:
+            mode: replicated
+            replicas: 1
+            restart_policy:
+                condition: on-failure
+                delay: 5s
+                max_attempts: 3
+                window: 120s
+            resources:
+                reservations:
+                    cpus: '0.20'
+                    memory: 50M
+                limits:
+                    cpus: '0.30'
+                    memory: 100M
+

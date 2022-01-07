@@ -33,14 +33,14 @@ echo " "
 
 docker build --no-cache -t ffelixneto/godebut:latest .
 
-echo $HASHLINE
-echo "Fazendo Push da imagem para Docker Hub..."
-echo $HASHLINE
-echo " "
+# echo $HASHLINE
+# echo "Fazendo Push da imagem para Docker Hub..."
+# echo $HASHLINE
+# echo " "
 
-docker push ffelixneto/godebut:latest
+# docker push ffelixneto/godebut:latest
 
-sleep 2
+# sleep 2
 
 echo $HASHLINE
 echo "Iniciando o serviço GoDebut..."
