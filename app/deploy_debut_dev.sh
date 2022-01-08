@@ -13,45 +13,31 @@ HASHLINE="##############################################"
 
 echo $HASHLINE
 echo "Removendo stack godebut em execução..."
-docker stack rm godebut
+docker stack rm godebut_dev
 echo $HASHLINE
 echo " "
 
 sleep 6
 
 echo $HASHLINE
-echo "Iniciando PULL do repositorio..."
+echo "Iniciando BUILD da imagem Dev..."
 echo $HASHLINE
 echo " "
 
-git pull
+docker build --no-cache -t ffelixneto/godebut_dev:latest .
+# docker build -t ffelixneto/godebut_dev:latest .
+
 
 echo $HASHLINE
-echo "Iniciando BUILD da imagem..."
-echo $HASHLINE
-echo " "
-
-docker build --no-cache -t ffelixneto/godebut:latest .
-
-echo $HASHLINE
-echo "Fazendo Push da imagem para Docker Hub..."
+echo "Iniciando o serviço GoDebut Dev..."
 echo $HASHLINE
 echo " "
 
-docker push ffelixneto/godebut:latest
+docker stack deploy godebut_dev -c docker-compose_dev.yml
 
 sleep 2
 
 echo $HASHLINE
-echo "Iniciando o serviço GoDebut..."
-echo $HASHLINE
-echo " "
-
-docker stack deploy godebut -c docker-compose.yml
-
-sleep 2
-
-echo $HASHLINE
-echo "GoDebut deploy finalizado !"
+echo "GoDebut Dev deploy finalizado !"
 echo $HASHLINE
 echo " "

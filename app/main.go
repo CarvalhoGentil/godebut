@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 
@@ -161,14 +162,36 @@ func effacerCachaca(w http.ResponseWriter, r *http.Request) {
 
 // initialeMigration é a função para executar a migração no banco
 func initialeMigration() {
-	db, err := gorm.Open("postgres", "host=db user=teste password=teste dbname=teste port=5432 sslmode=disable")
-	if err != nil {
-		fmt.Println("Erro de conexão ao banco de dados:")
-		fmt.Println(err.Error())
-	}
+
+	db_try := 0
+	fmt.Println("Tentando conectar ao banco de dados...")
+	for db_try < 20 {
+		db, err := gorm.Open("postgres", "host=db user=teste password=teste dbname=teste port=5432 sslmode=disable")
+		if err != nil && db_try == 0 {
+			fmt.Println("Erro de conexão ao banco de dados:")
+			fmt.Println(err.Error())
+		}
+		db_try += 1
+		time.Sleep(5 * time.Second)
+    }
+
+	// db, err := gorm.Open("postgres", "host=db user=teste password=teste dbname=teste port=5432 sslmode=disable")
+	// if err != nil {
+	// 	fmt.Println("Erro de conexão ao banco de dados:")
+	// 	fmt.Println(err.Error())
+	// }
+
+	// (awk '{print $7}')
 	defer db.Close()
 
 	db.AutoMigrate(&Consumidor{})
+
+	db.Create(&Consumidor{Nome: "felix marmotinha", Idade: "18"})
+	db.Create(&Consumidor{Nome: "felix-2-devops", Idade: "33"})
+	db.Create(&Consumidor{Nome: "jorbson-2-scripts", Idade: "21"})
+	db.Create(&Consumidor{Nome: "paulo-2-manager", Idade: "28"})
+	db.Delete(&Consumidor{}, 1)
+
 }
 
 // debut é a função que vai ativar as rotas

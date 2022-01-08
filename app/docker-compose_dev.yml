@@ -1,8 +1,8 @@
 version: '3.9'
 
-services: 
+services:
     api:
-        image: ffelixneto/godebut:latest
+        image: ffelixneto/godebut_dev:latest
         ports:
             - 8085:8085
         deploy:
@@ -20,21 +20,19 @@ services:
                 limits:
                     cpus: '0.30'
                     memory: 100M
+        
+        # command: ["./scripts/db_check.sh"]
     db:
-        user: "${UID}:${GID}"
         image: postgres
-        secrets:
-            - dbuser
-            - dbpass
-            - dbname
         ports:
-            - 5545:5432
+            - 5432:5432
         environment:
-            POSTGRES_USER_FILE: /run/secrets/dbuser
-            POSTGRES_PASSWORD_FILE: /run/secrets/dbpass
-            POSTGRES_DB_FILE: /run/secrets/dbname
+            TZ : "America/Sao_Paulo"
+            POSTGRES_USER : "teste"
+            POSTGRES_PASSWORD : "teste"
+            POSTGRES_DB : "teste"
         volumes:
-            - ./pgdata:/var/lib/postgresql/data
+            - ../pgdata:/var/lib/postgresql/data
         deploy:
             mode: replicated
             replicas: 1
@@ -45,16 +43,8 @@ services:
                 window: 120s
             resources:
                 reservations:
-                    cpus: '0.20'
-                    memory: 50M
-                limits:
                     cpus: '0.30'
                     memory: 100M
-
-secrets:
-    dbuser:
-        external: true
-    dbpass:
-        external: true
-    dbname:
-        external: true
+                limits:
+                    cpus: '0.40'
+                    memory: 200M

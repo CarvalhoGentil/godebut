@@ -15,5 +15,4 @@ FROM alpine:latest AS production
 COPY --from=builder /app .
 EXPOSE 8085
 
-# CMD ["go","run","main.go"]
 CMD ["./main"]
