@@ -163,38 +163,50 @@ func effacerCachaca(w http.ResponseWriter, r *http.Request) {
 // initialeMigration é a função para executar a migração no banco
 func initialeMigration() {
 
-	db_try := 0
-	fmt.Println("Tentando conectar ao banco de dados...")
-	for db_try < 20 {
-		db, err := gorm.Open("postgres", "host=db user=teste password=teste dbname=teste port=5432 sslmode=disable")
-		if err != nil && db_try == 0 {
-			fmt.Println("Erro de conexão ao banco de dados:")
-			fmt.Println(err.Error())
-		}
-		db_try += 1
-		time.Sleep(5 * time.Second)
-    }
+	fmt.Println("Migração inicial..")
 
-	// db, err := gorm.Open("postgres", "host=db user=teste password=teste dbname=teste port=5432 sslmode=disable")
-	// if err != nil {
-	// 	fmt.Println("Erro de conexão ao banco de dados:")
-	// 	fmt.Println(err.Error())
-	// }
+	db_try := 40
+	db_url := ("host=db user=teste password=teste dbname=teste port=5432 sslmode=disable")
 
-	// (awk '{print $7}')
+	db := PostgresConn(db_url, db_try)
+	fmt.Println("Conexão OK")
+
 	defer db.Close()
 
 	db.AutoMigrate(&Consumidor{})
 
+	// Inserção de dados para teste
 	db.Create(&Consumidor{Nome: "felix marmotinha", Idade: "18"})
 	db.Create(&Consumidor{Nome: "felix-2-devops", Idade: "33"})
 	db.Create(&Consumidor{Nome: "jorbson-2-scripts", Idade: "21"})
 	db.Create(&Consumidor{Nome: "paulo-2-manager", Idade: "28"})
+	db.Create(&Consumidor{Nome: "Nicer", Idade: "1"})
+	db.Create(&Consumidor{Nome: "Ezy", Idade: "2"})
 	db.Delete(&Consumidor{}, 1)
 
 }
 
-// debut é a função que vai ativar as rotas
+// PostgresConn tenta conectar e retornar uma conexão ao banco de dados postgres com retry
+// Se o numero de retry esgotar, gera panic(err)
+func PostgresConn(connectionUrl string, retry int) *gorm.DB {
+	var db *gorm.DB
+	var err error
+	db, err = gorm.Open("postgres", connectionUrl)
+	for err != nil {
+		fmt.Println("Tentativa conexão ao banco...", retry)
+
+		if retry > 1 {
+			retry--
+			time.Sleep(5 * time.Second)
+			db, err = gorm.Open("postgres", connectionUrl)
+			continue
+		}
+		panic(err)
+	}
+	return db
+}
+
+// debut é a função que vai ativar as rotas da API
 func debut() {
 
 	roteur := mux.NewRouter().StrictSlash(true)
