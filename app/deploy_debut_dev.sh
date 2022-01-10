@@ -20,6 +20,13 @@ echo " "
 sleep 6
 
 echo $HASHLINE
+echo "Removendo iamgens anteriores de Dev..."
+docker images | grep godebut_dev | docker rmi $(awk {'print $3'})
+echo $HASHLINE
+
+sleep 2
+
+echo $HASHLINE
 echo "Iniciando BUILD da imagem Dev..."
 echo $HASHLINE
 echo " "

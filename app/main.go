@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -13,6 +14,8 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+
+	"environ"
 )
 
 func main() {
@@ -163,10 +166,26 @@ func effacerCachaca(w http.ResponseWriter, r *http.Request) {
 // initialeMigration é a função para executar a migração no banco
 func initialeMigration() {
 
-	fmt.Println("Migração inicial..")
-
 	db_try := 40
-	db_url := ("host=db user=teste password=teste dbname=teste port=5432 sslmode=disable")
+	fmt.Println("Capturando variaveis de ambiente para conectar ao banco de dados...")
+
+	db_host := environ.GetEnvironValue("DEV_DB_HOST")
+	db_user := environ.GetEnvironValue("DEV_DB_USER")
+	db_passwd := environ.GetEnvironValue("DEV_DB_PASSWD")
+	db_name := environ.GetEnvironValue("DEV_DB_NAME")
+	db_port := environ.GetEnvironValue("DEV_DB_PORT")
+
+	var db_url = fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		db_host,
+		db_user,
+		db_passwd,
+		db_name,
+		db_port)
+
+	fmt.Println("Conectando na base", db_name)
+
+	// db_url := ("host=db user=teste password=teste dbname=teste port=5432 sslmode=disable")
 
 	db := PostgresConn(db_url, db_try)
 	fmt.Println("Conexão OK")
@@ -204,6 +223,26 @@ func PostgresConn(connectionUrl string, retry int) *gorm.DB {
 		panic(err)
 	}
 	return db
+}
+
+// Environ deve printar variaveis de ambiente do sistema
+func Environ(var_name string) {
+	// PRINTAR UMA VARIAVEL DE AMBIENTE
+	fmt.Println("Printando todas as variaveis do ambiente")
+
+	// PRINTAR TODAS AS VARIAVEIS DE AMBIENTE DO SISTEMA
+	for _, env := range os.Environ() {
+		fmt.Println(env)
+	}
+}
+
+// GetEnvironValue busca o valor de uma variavel de ambiente
+func GetEnvironValue(var_name string) string {
+
+	// RETORNAR VALOR DA VARIAVEL CONSULTADA
+	var env_result string
+	env_result = os.Getenv(var_name)
+	return env_result
 }
 
 // debut é a função que vai ativar as rotas da API

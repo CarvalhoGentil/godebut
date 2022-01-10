@@ -5,6 +5,12 @@ services:
         image: ffelixneto/godebut_dev:latest
         ports:
             - 8085:8085
+        environment:
+            DEV_DB_HOST : "${DEV_DB_HOST}"
+            DEV_DB_USER : "${DEV_DB_USER}"
+            DEV_DB_PASSWD : "${DEV_DB_PASSWD}"
+            DEV_DB_NAME : "${DEV_DB_NAME}"
+            DEV_DB_PORT : "${DEV_DB_PORT}"
         deploy:
             mode: replicated
             replicas: 1
@@ -20,17 +26,16 @@ services:
                 limits:
                     cpus: '0.30'
                     memory: 100M
-        
-        # command: ["./scripts/db_check.sh"]
+
     db:
         image: postgres
         ports:
-            - 5432:5432
+            - ${DEV_DB_PORT}:5432
         environment:
             TZ : "America/Sao_Paulo"
-            POSTGRES_USER : "teste"
-            POSTGRES_PASSWORD : "teste"
-            POSTGRES_DB : "teste"
+            POSTGRES_USER : "${DEV_DB_USER}"
+            POSTGRES_PASSWORD : "${DEV_DB_PASSWD}"
+            POSTGRES_DB : "${DEV_DB_NAME}"
         volumes:
             - ../pgdata:/var/lib/postgresql/data
         deploy:
