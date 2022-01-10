@@ -1,3 +1,9 @@
+## [1.0.26] - 10/01/2022
+### Adição
+- Adicionada logica de conexão ao banco com ORM gorm
+    O banco vai armazenar os dados para servir as requisições da API.
+    Inicialmente os dados são gerados apenas em memória.
+
 ## [1.0.25] - 22/07/2021
 
 ### Adição
@@ -13,7 +19,7 @@
     - ***unecachaca/'nome'*** para consulta
 
     <br>
-    A função effacercachaca já foi criado rspondendo no endpoint *unecachaca*
+    A função effacercachaca já foi criada rspondendo no endpoint *unecachaca*
 
 
 ## [1.0.24] - 14/07/2021
