@@ -3,7 +3,7 @@
 
 ![Pipeline Status](https://github.com/ffelixneto/godebut/actions/workflows/build-push-docker.yml/badge.svg) 
 
-#### Endpoints:
+### Endpoints disponíveis:
 ##### `"/"`
 Home Page
 
@@ -26,6 +26,14 @@ Remover uma cachaça da lista pelo nome
 Atualizar os dados de uma cachaça da lista pelo id
 
 #### Ambiente Stack
+A aplicação utiliza as variáveis de ambiente do sistema para montar a conexão ao banco.
+Devem ser criadas essas variáveis para o correto funcionamento dos serviços da aplicação:
+**DEV_DB_HOST**
+**DEV_DB_USER**
+**DEV_DB_PASSWD**
+**DEV_DB_NAME**
+**DEV_DB_PORT**
+
 O projeto deve ser executado em um ambiente com docker swarm ativo 
 >**`docker swarm init`**
 
@@ -34,3 +42,4 @@ O compose deve ser iniciado via stack.
 
 Buscar endpoints na porta 8085 do servidor
 >**`localhost:8085/`**
+
