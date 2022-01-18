@@ -17,10 +17,10 @@ docker stack rm godebut_dev
 echo $HASHLINE
 echo " "
 
-sleep 6
+sleep 8
 
 echo $HASHLINE
-echo "Removendo iamgens anteriores de Dev..."
+echo "Removendo imagens anteriores de Dev..."
 docker images | grep godebut_dev | docker rmi $(awk {'print $3'})
 echo $HASHLINE
 

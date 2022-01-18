@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -80,13 +79,10 @@ func uneCachaca(w http.ResponseWriter, r *http.Request) {
 func nouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: nouvelleCachaca")
 
-	db, err := gorm.Open("postgres", "host=teste user=teste password=teste dbname=teste port=5432 sslmode=disable")
-	if err != nil {
-		fmt.Println("Erro de conexão ao banco de dados: \"" + err.Error() + "\"")
+	reqBody, erro := ioutil.ReadAll(r.Body)
+	if erro != nil {
+		panic(erro)
 	}
-	defer db.Close()
-
-	reqBody, _ := ioutil.ReadAll(r.Body)
 	var cachaca Cachaca
 
 	json.Unmarshal(reqBody, &cachaca)
@@ -104,7 +100,7 @@ func nouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// renouvelleCachaca ó o endpoint para aualizar um registro de cachaca
+// renouvelleCachaca é o endpoint para atualizar um registro de cachaca
 func renouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: renouvelerCachaca")
 
@@ -134,7 +130,7 @@ func renouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintln(w, "Nenhuma cachaca encontrada com o Id: \""+cle+"\"")
 		}
 	} else {
-		fmt.Fprintln(w, "Os dados de ID deve ser preenchido !")
+		fmt.Fprintln(w, "O dado de ID deve ser preenchido !")
 	}
 }
 
@@ -163,35 +159,56 @@ func effacerCachaca(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// initialeMigration é a função para executar a migração no banco
-func initialeMigration() {
+// toutesConsumidores é o endpoint para listar todos os consumidores
+func toutesConsumidores(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint: toutesConsumidores")
 
-	db_try := 40
-	fmt.Println("Capturando variaveis de ambiente para conectar ao banco de dados...")
-
-	db_host := environ.GetEnvironValue("DEV_DB_HOST")
-	db_user := environ.GetEnvironValue("DEV_DB_USER")
-	db_passwd := environ.GetEnvironValue("DEV_DB_PASSWD")
-	db_name := environ.GetEnvironValue("DEV_DB_NAME")
-	db_port := environ.GetEnvironValue("DEV_DB_PORT")
-
-	var db_url = fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		db_host,
-		db_user,
-		db_passwd,
-		db_name,
-		db_port)
-
-	fmt.Println("Conectando na base", db_name)
-
-	// db_url := ("host=db user=teste password=teste dbname=teste port=5432 sslmode=disable")
-
-	db := PostgresConn(db_url, db_try)
+	db := PostgresConn()
+	defer db.Close()
 	fmt.Println("Conexão OK")
 
-	defer db.Close()
+	fmt.Println("Listando consumidores...")
+	var consumidores []Consumidor
+	db.Find(&consumidores)
 
+	for _, consu := range consumidores {
+		fmt.Println("Nome: ", consu.Nome, "Idade: ", consu.Idade)
+	}
+
+	json.NewEncoder(w).Encode(consumidores)
+}
+
+// nouvelleConsumidor é o endpoint para adicionar um novo consumidor aos registros do banco
+func nouvelleConsumidor(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint: nouvelleConsumidor")
+
+	db := PostgresConn()
+	defer db.Close()
+	fmt.Println("Conexão OK")
+
+	reqBody, erro := ioutil.ReadAll(r.Body)
+	if erro != nil {
+		panic(erro)
+	}
+	var consumidor Consumidor
+	json.Unmarshal(reqBody, &consumidor)
+
+	// Validar dados basicos antes de adicionar
+	if consumidor.Nome !="" && consumidor.Idade != "" {
+		db.Create(&Consumidor{Nome: consumidor.Nome, Idade: consumidor.Idade})
+		fmt.Fprintln(w, "O consumidor \""+consumidor.Nome+"\" foi adicionada a lista.")
+	} else {
+		fmt.Fprintln(w, "Os dados de Nome e Idade devem ser preenchidos !")
+	}
+}
+
+// initialeMigration é a função para executar a migração no banco
+// e fazer o seed com alguns valores para teste
+// func initialeMigration(db *gorm.DB) {
+func initialeMigration() {
+
+	db := PostgresConn()
+	db.DropTable(&Consumidor{})
 	db.AutoMigrate(&Consumidor{})
 
 	// Inserção de dados para teste
@@ -202,47 +219,45 @@ func initialeMigration() {
 	db.Create(&Consumidor{Nome: "Nicer", Idade: "1"})
 	db.Create(&Consumidor{Nome: "Ezy", Idade: "2"})
 	db.Delete(&Consumidor{}, 1)
-
 }
 
 // PostgresConn tenta conectar e retornar uma conexão ao banco de dados postgres com retry
 // Se o numero de retry esgotar, gera panic(err)
-func PostgresConn(connectionUrl string, retry int) *gorm.DB {
+func PostgresConn() *gorm.DB {
 	var db *gorm.DB
 	var err error
-	db, err = gorm.Open("postgres", connectionUrl)
-	for err != nil {
-		fmt.Println("Tentativa conexão ao banco...", retry)
+	fmt.Println("Capturando variaveis de ambiente para conectar ao banco de dados...")
 
-		if retry > 1 {
-			retry--
+	db_host := environ.GetEnvironValue("DEV_DB_HOST")
+	db_user := environ.GetEnvironValue("DEV_DB_USER")
+	db_passwd := environ.GetEnvironValue("DEV_DB_PASSWD")
+	db_name := environ.GetEnvironValue("DEV_DB_NAME")
+	db_port := environ.GetEnvironValue("DEV_DB_PORT")
+
+	db_try := 40
+	var db_url = fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		db_host,
+		db_user,
+		db_passwd,
+		db_name,
+		db_port)
+
+	fmt.Println("Conectando na base", db_name)
+
+	db, err = gorm.Open("postgres", db_url)
+	for err != nil {
+		fmt.Println("Tentativa conexão ao banco...", db_try)
+
+		if db_try > 1 {
+			db_try--
 			time.Sleep(5 * time.Second)
-			db, err = gorm.Open("postgres", connectionUrl)
+			db, err = gorm.Open("postgres", db_url)
 			continue
 		}
 		panic(err)
 	}
 	return db
-}
-
-// Environ deve printar variaveis de ambiente do sistema
-func Environ(var_name string) {
-	// PRINTAR UMA VARIAVEL DE AMBIENTE
-	fmt.Println("Printando todas as variaveis do ambiente")
-
-	// PRINTAR TODAS AS VARIAVEIS DE AMBIENTE DO SISTEMA
-	for _, env := range os.Environ() {
-		fmt.Println(env)
-	}
-}
-
-// GetEnvironValue busca o valor de uma variavel de ambiente
-func GetEnvironValue(var_name string) string {
-
-	// RETORNAR VALOR DA VARIAVEL CONSULTADA
-	var env_result string
-	env_result = os.Getenv(var_name)
-	return env_result
 }
 
 // debut é a função que vai ativar as rotas da API
@@ -254,12 +269,19 @@ func debut() {
 	roteur.HandleFunc("/", pageInitial)
 	roteur.HandleFunc("/aproposde", aProposDe)
 
-	// Rotas de endpoints do CRUD
+	// Rotas de endpoints das cachaças
 	roteur.HandleFunc("/v1/toutescachacas", toutesCachacas)
 	roteur.HandleFunc("/v1/unecachaca", nouvelleCachaca).Methods("POST")
 	roteur.HandleFunc("/v1/unecachaca/{id}", renouvelleCachaca).Methods("PUT")
 	roteur.HandleFunc("/v1/unecachaca/{nome}", effacerCachaca).Methods("DELETE")
 	roteur.HandleFunc("/v1/unecachaca/{nome}", uneCachaca)
+
+	// Rotas de endpoints dos consmidores
+	roteur.HandleFunc("/v1/toutesconsumidores", toutesConsumidores)
+	roteur.HandleFunc("/v1/uneconsumidor", nouvelleConsumidor).Methods("POST")
+	// roteur.HandleFunc("/v1/uneconsumidor/{id}", renouvelleConsumidor).Methods("PUT")
+	// roteur.HandleFunc("/v1/uneconsumidor/{nome}", effacerConsumidor).Methods("DELETE")
+	// roteur.HandleFunc("/v1/uneconsumidor/{nome}", uneConsumidor)
 
 	log.Fatal(http.ListenAndServe(":8085", roteur))
 }
@@ -272,6 +294,7 @@ type Cachaca struct {
 	Custo  string `json:"custo"`
 }
 
+// Consumidor é a estrutura base para a tabela "consumidors" no banco
 type Consumidor struct {
 	gorm.Model
 	Nome  string
