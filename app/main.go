@@ -18,7 +18,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Iniciando alambique em http://localhost:8085 ")
 	Cachacas = []Cachaca{
 		{Id: "0", Nome: "51", Volume: "974ml", Custo: "8"},
 		{Id: "1", Nome: "Matuta", Volume: "1000ml", Custo: "30"},
@@ -301,11 +300,11 @@ func PostgresConn() *gorm.DB {
 	var err error
 	fmt.Println("Capturando variaveis de ambiente para conectar ao banco de dados...")
 
-	db_host := environ.GetEnvironValue("DEV_DB_HOST")
-	db_user := environ.GetEnvironValue("DEV_DB_USER")
-	db_passwd := environ.GetEnvironValue("DEV_DB_PASSWD")
-	db_name := environ.GetEnvironValue("DEV_DB_NAME")
-	db_port := environ.GetEnvironValue("DEV_DB_PORT")
+	db_host := environ.GetEnvironValue("DB_HOST")
+	db_user := environ.GetEnvironValue("DB_USER")
+	db_passwd := environ.GetEnvironValue("DB_PASSWD")
+	db_name := environ.GetEnvironValue("DB_NAME")
+	db_port := environ.GetEnvironValue("DB_PORT")
 
 	db_try := 40
 	var db_url = fmt.Sprintf(
@@ -354,7 +353,11 @@ func debut() {
 	roteur.HandleFunc("/v1/uneconsumidor/{nome}", effacerConsumidor).Methods("DELETE")
 	roteur.HandleFunc("/v1/uneconsumidor/{nome}", uneConsumidor)
 
-	log.Fatal(http.ListenAndServe(":8085", roteur))
+	api_environ := environ.GetEnvironValue("API_PORT")
+	var api_port = ":" + fmt.Sprintf("%v", api_environ)
+
+	fmt.Println("Iniciando alambique em http://localhost" + api_port)
+	log.Fatal(http.ListenAndServe(api_port, roteur))
 }
 
 // Cachaca é a estrutura base para o projeto cachaça

@@ -4,13 +4,14 @@ services:
     api:
         image: ffelixneto/godebut_dev:latest
         ports:
-            - 8085:8085
+            - ${API_PORT}:8085
         environment:
-            DEV_DB_HOST : "${DEV_DB_HOST}"
-            DEV_DB_USER : "${DEV_DB_USER}"
-            DEV_DB_PASSWD : "${DEV_DB_PASSWD}"
-            DEV_DB_NAME : "${DEV_DB_NAME}"
-            DEV_DB_PORT : "${DEV_DB_PORT}"
+            API_PORT : "${API_PORT}"
+            DB_HOST : "${DB_HOST}"
+            DB_USER : "${DB_USER}"
+            DB_PASSWD : "${DB_PASSWD}"
+            DB_NAME : "${DB_NAME}"
+            DB_PORT : "${DB_PORT}"
         deploy:
             mode: replicated
             replicas: 1
@@ -30,12 +31,12 @@ services:
     db:
         image: postgres
         ports:
-            - ${DEV_DB_PORT}:5432
+            - ${DB_PORT}:5432
         environment:
             TZ : "America/Sao_Paulo"
-            POSTGRES_USER : "${DEV_DB_USER}"
-            POSTGRES_PASSWORD : "${DEV_DB_PASSWD}"
-            POSTGRES_DB : "${DEV_DB_NAME}"
+            POSTGRES_USER : "${DB_USER}"
+            POSTGRES_PASSWORD : "${DB_PASSWD}"
+            POSTGRES_DB : "${DB_NAME}"
         volumes:
             - ../pgdata:/var/lib/postgresql/data
         deploy:

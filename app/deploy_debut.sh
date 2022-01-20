@@ -9,49 +9,52 @@
 
 clear
 
+stack_name="godebut_dev"
+environment="Dev"
+if [[ $1 == "prod" ]]; then
+    echo "Ambiente produção ATIVARRR !!!"
+    stack_name="godebut"
+    environment="Produção"
+else
+    echo "Ambiente teste ;)"
+fi
+
 HASHLINE="##############################################"
 
 echo $HASHLINE
-echo "Removendo stack godebut em execução..."
-docker stack rm godebut
+echo "Removendo stack godebut_dev para liberar as portas..."
+docker stack rm $stack_name
 echo $HASHLINE
 echo " "
 
-sleep 6
+sleep 8
 
 echo $HASHLINE
-echo "Iniciando PULL do repositorio..."
+echo "Removendo imagens anteriores de $stack_name..."
+docker images | grep $stack_name | docker rmi $(awk {'print $3'})
 echo $HASHLINE
-echo " "
-
-git pull
-
-echo $HASHLINE
-echo "Iniciando BUILD da imagem..."
-echo $HASHLINE
-echo " "
-
-docker build --no-cache -t ffelixneto/godebut:latest .
-
-echo $HASHLINE
-echo "Fazendo Push da imagem para Docker Hub..."
-echo $HASHLINE
-echo " "
-
-docker push ffelixneto/godebut:latest
 
 sleep 2
 
 echo $HASHLINE
-echo "Iniciando o serviço GoDebut..."
+echo "Iniciando BUILD da imagem $stack_name..."
 echo $HASHLINE
 echo " "
 
-docker stack deploy godebut -c docker-compose.yml
+docker build --no-cache -t ffelixneto/$stack_name:latest .
+# docker build -t ffelixneto/godebut_dev:latest .
+
+
+echo $HASHLINE
+echo "Iniciando o serviço $stack_name..."
+echo $HASHLINE
+echo " "
+
+docker stack deploy $stack_name -c docker-compose_dev.yml
 
 sleep 2
 
 echo $HASHLINE
-echo "GoDebut deploy finalizado !"
+echo "GoDebut $environment deploy finalizado !"
 echo $HASHLINE
 echo " "
