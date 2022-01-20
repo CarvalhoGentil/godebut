@@ -25,6 +25,7 @@ func main() {
 	}
 
 	initialeMigration()
+	fmt.Println("Conectando na base teste - OK ...")
 
 	debut()
 }
@@ -131,6 +132,7 @@ func renouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		fmt.Fprintln(w, "O dado de ID deve ser preenchido !")
+		fmt.Println("O dado de ID deve ser preenchido !")
 	}
 }
 
@@ -178,7 +180,7 @@ func toutesConsumidores(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(consumidores)
 }
 
-// nouvelleConsumidor é o endpoint para adicionar um novo consumidor aos registros do banco
+// nouvelleConsumidor é o endpoint para adicionar um novo registro de consumidor
 func nouvelleConsumidor(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: nouvelleConsumidor")
 
@@ -194,12 +196,83 @@ func nouvelleConsumidor(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(reqBody, &consumidor)
 
 	// Validar dados basicos antes de adicionar
-	if consumidor.Nome !="" && consumidor.Idade != "" {
+	if consumidor.Nome != "" && consumidor.Idade != "" {
 		db.Create(&Consumidor{Nome: consumidor.Nome, Idade: consumidor.Idade})
 		fmt.Fprintln(w, "O consumidor \""+consumidor.Nome+"\" foi adicionada a lista.")
 	} else {
 		fmt.Fprintln(w, "Os dados de Nome e Idade devem ser preenchidos !")
 	}
+}
+
+// renouvelleConsumidor é o endpoint para atualizar um registro de consumidor
+func renouvelleConsumidor(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint: renouvelleConsumidor")
+
+	db := PostgresConn()
+	defer db.Close()
+	fmt.Println("Conexão OK")
+
+	vars := mux.Vars(r)
+	cle := vars["id"]
+	reqBody, erro := ioutil.ReadAll(r.Body)
+	if erro != nil {
+		panic(erro)
+	}
+
+	var new_consumidor Consumidor
+	var consumidor Consumidor
+	json.Unmarshal(reqBody, &new_consumidor)
+
+	// consumidorencontrado := False
+
+	if cle != "" {
+		db.Find(&consumidor, cle)
+
+		if consumidor.ID != 0 {
+			fmt.Println("Dados encontrador", consumidor.Nome, consumidor.ID)
+
+			if new_consumidor.Nome != "" {
+				consumidor.Nome = new_consumidor.Nome
+			}
+
+			if new_consumidor.Idade != "" {
+				consumidor.Idade = new_consumidor.Idade
+			}
+
+			fmt.Println("Dados atualizados", consumidor.Nome, consumidor.ID)
+			json.NewEncoder(w).Encode(consumidor)
+			db.Save(&consumidor)
+
+		} else {
+			fmt.Fprintln(w, "Nenhum consumidor encontrado com o Id: \""+cle+"\"")
+			fmt.Println("Nenhum consumidor encontrado com o Id:", "\""+cle+"\"")
+		}
+
+	} else {
+		fmt.Fprintln(w, "O dado de ID deve ser preenchido !")
+		fmt.Println("O dado de ID deve ser preenchido !")
+	}
+
+}
+
+// effacerConsumidor é o endpoint para deletar um registro de consumidor
+func effacerConsumidor(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint: effacerConsumidor")
+
+	db := PostgresConn()
+	defer db.Close()
+	fmt.Println("Conexão OK")
+	fmt.Println("TODO")
+}
+
+// uneConsumidor é o endpoint para listar um consumidor buscando pelo nome informado na URL
+func uneConsumidor(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint: uneConsumidor")
+
+	db := PostgresConn()
+	defer db.Close()
+	fmt.Println("Conexão OK")
+	fmt.Println("TODO")
 }
 
 // initialeMigration é a função para executar a migração no banco
@@ -243,8 +316,6 @@ func PostgresConn() *gorm.DB {
 		db_name,
 		db_port)
 
-	fmt.Println("Conectando na base", db_name)
-
 	db, err = gorm.Open("postgres", db_url)
 	for err != nil {
 		fmt.Println("Tentativa conexão ao banco...", db_try)
@@ -279,9 +350,9 @@ func debut() {
 	// Rotas de endpoints dos consmidores
 	roteur.HandleFunc("/v1/toutesconsumidores", toutesConsumidores)
 	roteur.HandleFunc("/v1/uneconsumidor", nouvelleConsumidor).Methods("POST")
-	// roteur.HandleFunc("/v1/uneconsumidor/{id}", renouvelleConsumidor).Methods("PUT")
-	// roteur.HandleFunc("/v1/uneconsumidor/{nome}", effacerConsumidor).Methods("DELETE")
-	// roteur.HandleFunc("/v1/uneconsumidor/{nome}", uneConsumidor)
+	roteur.HandleFunc("/v1/uneconsumidor/{id}", renouvelleConsumidor).Methods("PUT")
+	roteur.HandleFunc("/v1/uneconsumidor/{nome}", effacerConsumidor).Methods("DELETE")
+	roteur.HandleFunc("/v1/uneconsumidor/{nome}", uneConsumidor)
 
 	log.Fatal(http.ListenAndServe(":8085", roteur))
 }
