@@ -309,10 +309,36 @@ func effacerConsumidor(w http.ResponseWriter, r *http.Request) {
 // uneConsumidor é o endpoint para listar um consumidor buscando pelo nome informado na URL
 func uneConsumidor(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: uneConsumidor")
+	w.Header().Set("Content-Type", "application/json")
 
 	db := PostgresConn()
 	defer db.Close()
-	fmt.Println("TODO")
+
+	vars := mux.Vars(r)
+	cle := vars["id"]
+
+	var consumidor Consumidor
+
+	if cle != ""{
+		db.Find(&consumidor, cle)
+
+		if consumidor.ID != 0 {
+			fmt.Println("Selecionado consumidor com Id", cle)
+			json.NewEncoder(w).Encode(consumidor)
+
+		} else {
+			fmt.Println("Nenhum consumidor encontrado com o Id:", "\""+cle+"\"")
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprintln(w, "Nenhum consumidor encontrado com o Id: \""+cle+"\"")
+		}
+	
+	} else {
+		fmt.Println("O dado de ID deve ser informado !")
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintln(w, "O dado de ID deve ser informado !")
+	}
+
+
 }
 
 // initialeMigration é a função para executar a migração no banco
@@ -392,7 +418,7 @@ func debut() {
 	roteur.HandleFunc("/v1/uneconsumidor", nouvelleConsumidor).Methods("POST")
 	roteur.HandleFunc("/v1/uneconsumidor/{id}", renouvelleConsumidor).Methods("PUT")
 	roteur.HandleFunc("/v1/uneconsumidor/{id}", effacerConsumidor).Methods("DELETE")
-	roteur.HandleFunc("/v1/uneconsumidor/{nome}", uneConsumidor)
+	roteur.HandleFunc("/v1/uneconsumidor/{id}", uneConsumidor)
 
 	api_environ := environ.GetEnvironValue("API_PORT")
 	var api_port = ":" + fmt.Sprintf("%v", api_environ)
