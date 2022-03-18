@@ -73,7 +73,7 @@ func uneCachaca(w http.ResponseWriter, r *http.Request) {
 	}
 	// Mensagem padrao para consulta vazia
 	if cachacaencontra != true {
-		fmt.Println("Nenhuma cachaca encontrada com o Nome: \""+cle+"\"")
+		fmt.Println("Nenhuma cachaca encontrada com o Nome: \"" + cle + "\"")
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintln(w, "Nenhuma cachaca encontrada com o Nome: \""+cle+"\"")
 	}
@@ -95,14 +95,11 @@ func nouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 	// Validar dados basicos antes de adicionar
 	if cachaca.Id != "" && cachaca.Nome != "" {
 		Cachacas = append(Cachacas, cachaca)
-
 		fmt.Fprintln(w, "A cachaca \""+cachaca.Nome+"\" foi adicionada a lista.")
-
 		json.NewEncoder(w).Encode(cachaca)
-
 	} else {
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintln(w, "Os dados de ID e NOME devem ser preenchidos !")
+		fmt.Fprintln(w, "Os dados de \"id\" e \"nome\" devem ser informados !")
 	}
 }
 
@@ -134,7 +131,7 @@ func renouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 		}
 		// Mensagem padrão para consula vazia
 		if cachacaencontra != true {
-			fmt.Println("Nenhuma cachaca encontrada com o Id: \""+cle+"\"")
+			fmt.Println("Nenhuma cachaca encontrada com o Id: \"" + cle + "\"")
 			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprintln(w, "Nenhuma cachaca encontrada com o Id: \""+cle+"\"")
 		}
@@ -167,7 +164,7 @@ func effacerCachaca(w http.ResponseWriter, r *http.Request) {
 	}
 	// Mensagem padrão para consula vazia
 	if cachacaencontra != true {
-		fmt.Println("Nenhuma cachaca encontrada com o nome: \""+cle+"\"")
+		fmt.Println("Nenhuma cachaca encontrada com o nome: \"" + cle + "\"")
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintln(w, "Nenhuma cachaca encontrada com o nome: \""+cle+"\"")
 	}
@@ -209,10 +206,11 @@ func nouvelleConsumidor(w http.ResponseWriter, r *http.Request) {
 	// Validar dados basicos antes de adicionar
 	if consumidor.Nome != "" && consumidor.Idade != "" {
 		db.Create(&Consumidor{Nome: consumidor.Nome, Idade: consumidor.Idade})
-		fmt.Fprintln(w, "O consumidor \""+consumidor.Nome+"\" foi adicionada a lista.")
+		fmt.Fprintln(w, "O consumidor \""+consumidor.Nome+"\" foi adicionado a lista.")
+		json.NewEncoder(w).Encode(consumidor)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintln(w, "Os dados de Nome e Idade devem ser preenchidos !")
+		fmt.Fprintln(w, "Os dados de \"nome\" e \"idade\" devem ser informados !")
 	}
 }
 
@@ -288,10 +286,10 @@ func effacerConsumidor(w http.ResponseWriter, r *http.Request) {
 		db.Find(&consumidor, cle)
 
 		if consumidor.ID != 0 {
-			fmt.Println("Consumidor ID", consumidor.ID ,"deletado ! ")
-			fmt.Fprintln(w, "Consumidor ID", consumidor.ID ,"deletado ! ")
+			fmt.Println("Consumidor ID", consumidor.ID, "deletado ! ")
+			fmt.Fprintln(w, "Consumidor ID", consumidor.ID, "deletado ! ")
 			db.Delete(&consumidor)
-			
+
 		} else {
 			fmt.Println("Nenhum consumidor encontrado com o Id:", "\""+cle+"\"")
 			w.WriteHeader(http.StatusNotFound)
@@ -319,7 +317,7 @@ func uneConsumidor(w http.ResponseWriter, r *http.Request) {
 
 	var consumidor Consumidor
 
-	if cle != ""{
+	if cle != "" {
 		db.Find(&consumidor, cle)
 
 		if consumidor.ID != 0 {
@@ -331,13 +329,12 @@ func uneConsumidor(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprintln(w, "Nenhum consumidor encontrado com o Id: \""+cle+"\"")
 		}
-	
+
 	} else {
 		fmt.Println("O dado de ID deve ser informado !")
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintln(w, "O dado de ID deve ser informado !")
 	}
-
 
 }
 

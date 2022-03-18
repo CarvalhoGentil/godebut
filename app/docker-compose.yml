@@ -46,4 +46,3 @@ services:
                 limits:
                     cpus: '0.30'
                     memory: 100M
-    
