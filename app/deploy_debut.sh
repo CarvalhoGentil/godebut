@@ -41,8 +41,10 @@ echo "Iniciando BUILD da imagem $stack_name..."
 echo $HASHLINE
 echo " "
 
-docker build --no-cache -t ffelixneto/$stack_name:latest .
-# docker build -t ffelixneto/godebut_dev:latest .
+# CACHE
+docker build -t ffelixneto/$stack_name:latest .
+# NO CACHE
+# docker build --no-cache -t ffelixneto/$stack_name:latest .
 
 
 echo $HASHLINE

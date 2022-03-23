@@ -23,6 +23,10 @@ func main() {
 		{Id: "1", Nome: "Matuta", Volume: "1000ml", Custo: "30"},
 	}
 
+	// Endpoints = []Endpoint{
+	// 	{},
+	// }
+
 	initialeMigration()
 	fmt.Println("Conectando na base teste - OK ...")
 
@@ -30,14 +34,15 @@ func main() {
 }
 
 // pageInitial (Home Page) função para mostrar uma home page qualquer
-func pageInitial(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Endpoint: pageInitial")
+// func pageInitial(w http.ResponseWriter, r *http.Request) {
+// 	fmt.Println("Endpoint: pageInitial")
 
-	fmt.Fprintln(w, "- ......... -")
-	fmt.Fprintln(w, "-- 2ez4Flz --")
-	fmt.Fprintln(w, "-  GoDrink  -")
-	fmt.Fprintln(w, "- ......... -")
-}
+	// fmt.Fprintln(w, "- ......... -")
+	// fmt.Fprintln(w, "-- 2ez4Flx --")
+	// fmt.Fprintln(w, "-  GoDrink  -")
+	// fmt.Fprintln(w, "-  BzrSytes -")
+	// fmt.Fprintln(w, "- ......... -")
+// }
 
 // aProposDe (About) é para mostrar minhas informações
 func aProposDe(w http.ResponseWriter, r *http.Request) {
@@ -47,6 +52,13 @@ func aProposDe(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, "A propos de...", qui)
 }
+
+// toutesv1Endpoints é o endpoint para exibir listagem de endpoints v1
+// func toutesv1Endpoints(w http.ResponseWriter, r *http.Request) {
+// 	fmt.Println("Endpoint: toutesv1Endpoints")
+// 	w.Header().Set("Content-Type", "application/json")
+// 	json.NewEncoder(w).Encode(Endpoints)
+// }
 
 // toutesCachacas é o endpoint para listar todas as cachaças cadastradas
 func toutesCachacas(w http.ResponseWriter, r *http.Request) {
@@ -400,16 +412,22 @@ func debut() {
 	roteur := mux.NewRouter().StrictSlash(true)
 
 	// Rotas de visualização
-	roteur.HandleFunc("/", pageInitial)
+	// roteur.HandleFunc("/", pageInitial)
+	roteur.Handle("/", http.FileServer(http.Dir("./pages/")))
+	
 	roteur.HandleFunc("/aproposde", aProposDe)
 
+	// Rotas de documentação
+	// roteur.HandleFunc("/v1/toutescachacas", toutesv1Endpoints)
+	// TODO - ENDPOINT PARA LSITAGEM DE ENDPOINTS V1
+	
 	// Rotas de endpoints das cachaças
 	roteur.HandleFunc("/v1/toutescachacas", toutesCachacas)
 	roteur.HandleFunc("/v1/unecachaca", nouvelleCachaca).Methods("POST")
 	roteur.HandleFunc("/v1/unecachaca/{id}", renouvelleCachaca).Methods("PUT")
 	roteur.HandleFunc("/v1/unecachaca/{nome}", effacerCachaca).Methods("DELETE")
 	roteur.HandleFunc("/v1/unecachaca/{nome}", uneCachaca)
-
+	
 	// Rotas de endpoints dos consmidores
 	roteur.HandleFunc("/v1/toutesconsumidores", toutesConsumidores)
 	roteur.HandleFunc("/v1/uneconsumidor", nouvelleConsumidor).Methods("POST")
@@ -417,6 +435,7 @@ func debut() {
 	roteur.HandleFunc("/v1/uneconsumidor/{id}", effacerConsumidor).Methods("DELETE")
 	roteur.HandleFunc("/v1/uneconsumidor/{id}", uneConsumidor)
 
+	
 	api_environ := environ.GetEnvironValue("API_PORT")
 	var api_port = ":" + fmt.Sprintf("%v", api_environ)
 
@@ -431,6 +450,14 @@ type Cachaca struct {
 	Volume string `json:"volume"`
 	Custo  string `json:"custo"`
 }
+
+// Endpoint é a estrutura base para o projeto cachaça
+// type Endpoint struct {
+// 	gorm.Model
+// 	Nome   	string
+// 	Versao 	string
+// 	Metodo  string
+// }
 
 // Consumidor é a estrutura base para a tabela "consumidors" no banco
 type Consumidor struct {
