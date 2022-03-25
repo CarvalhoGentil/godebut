@@ -413,12 +413,11 @@ func debut() {
 
 	// Rotas de visualização
 	// roteur.HandleFunc("/", pageInitial)
-	roteur.Handle("/", http.FileServer(http.Dir("./pages/")))
 	
 	roteur.HandleFunc("/aproposde", aProposDe)
-
+	
 	// Rotas de documentação
-	// roteur.HandleFunc("/v1/toutescachacas", toutesv1Endpoints)
+	// roteur.HandleFunc("/v1/toutesendpoints", toutesv1Endpoints)
 	// TODO - ENDPOINT PARA LSITAGEM DE ENDPOINTS V1
 	
 	// Rotas de endpoints das cachaças
@@ -434,11 +433,13 @@ func debut() {
 	roteur.HandleFunc("/v1/uneconsumidor/{id}", renouvelleConsumidor).Methods("PUT")
 	roteur.HandleFunc("/v1/uneconsumidor/{id}", effacerConsumidor).Methods("DELETE")
 	roteur.HandleFunc("/v1/uneconsumidor/{id}", uneConsumidor)
-
+	
+	// Pagina inicial
+	roteur.PathPrefix("/").Handler(http.StripPrefix("/",http.FileServer(http.Dir("./pages/"))))
 	
 	api_environ := environ.GetEnvironValue("API_PORT")
 	var api_port = ":" + fmt.Sprintf("%v", api_environ)
-
+	
 	fmt.Println("Iniciando alambique em http://localhost" + api_port)
 	log.Fatal(http.ListenAndServe(api_port, roteur))
 }
