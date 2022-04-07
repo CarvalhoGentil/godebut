@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -18,10 +17,10 @@ import (
 )
 
 func main() {
-	Cachacas = []Cachaca{
-		{Id: "0", Nome: "51", Volume: "974ml", Custo: "8"},
-		{Id: "1", Nome: "Matuta", Volume: "1000ml", Custo: "30"},
-	}
+	// Cachacas = []Cachaca{
+	// 	{Nome: "51", Volume: "974ml", Custo: "8"},
+	// 	{Nome: "Matuta", Volume: "1000ml", Custo: "30"},
+	// }
 
 	// Endpoints = []Endpoint{
 	// 	{},
@@ -64,7 +63,17 @@ func aProposDe(w http.ResponseWriter, r *http.Request) {
 func toutesCachacas(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: toutesCachacas")
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(Cachacas)
+	db := PostgresConn()
+	defer db.Close()
+
+	fmt.Println("Listando cachacas...")
+	var cachacas []Cachaca
+	db.Find(&cachacas)
+
+	for _, cana := range cachacas {
+		fmt.Println("Id", cana.ID, "Nome: ", cana.Nome, "Volume: ", cana.Volume, "Custo: ", cana.Custo)
+	}
+	json.NewEncoder(w).Encode(cachacas)
 }
 
 // uneCachaca é o endpoint para listar uma cachaça buscando pelo nome informado na URL
@@ -72,22 +81,30 @@ func uneCachaca(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: uneCachaca")
 	w.Header().Set("Content-Type", "application/json")
 
-	vars := mux.Vars(r)
-	cle := vars["nome"]
-	cachacaencontra := false
+	db := PostgresConn()
+	defer db.Close()
 
-	// Buscar na lista de cachacas o nome informado
-	for _, cachaca := range Cachacas {
-		if strings.ToLower(cachaca.Nome) == strings.ToLower(cle) {
-			cachacaencontra = true
+	vars := mux.Vars(r)
+	cle := vars["id"]
+
+	var cachaca Cachaca
+
+	if cle != "" {
+		db.Find(&cachaca, cle)
+
+		if cachaca.ID != 0 {
+			fmt.Println("Selecionando cachaca com Id:", cle)
 			json.NewEncoder(w).Encode(cachaca)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Println("Nenhuma cacaça econtrada com o Id:", cle)
+			fmt.Fprintln(w, "Nenhuma cacaça econtrada com o Id:", cle)
 		}
-	}
-	// Mensagem padrao para consulta vazia
-	if cachacaencontra != true {
-		fmt.Println("Nenhuma cachaca encontrada com o Nome: \"" + cle + "\"")
+
+	} else {
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintln(w, "Nenhuma cachaca encontrada com o Nome: \""+cle+"\"")
+		fmt.Println("O dado de ID deve ser informado !")
+		fmt.Fprintln(w, "O dado de ID deve ser informado !")
 	}
 }
 
@@ -96,22 +113,24 @@ func nouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: nouvelleCachaca")
 	w.Header().Set("Content-Type", "application/json")
 
+	db := PostgresConn()
+	defer db.Close()
+
 	reqBody, erro := ioutil.ReadAll(r.Body)
 	if erro != nil {
 		panic(erro)
 	}
 	var cachaca Cachaca
-
 	json.Unmarshal(reqBody, &cachaca)
 
 	// Validar dados basicos antes de adicionar
-	if cachaca.Id != "" && cachaca.Nome != "" {
-		Cachacas = append(Cachacas, cachaca)
-		fmt.Fprintln(w, "A cachaca \""+cachaca.Nome+"\" foi adicionada a lista.")
+	if cachaca.Nome != "" && cachaca.Volume != "" && cachaca.Custo != "" {
+		db.Create(&Cachaca{Nome : cachaca.Nome, Volume: cachaca.Volume, Custo: cachaca.Custo})
+		fmt.Fprintln(w, "A cachaca ", cachaca.Nome, " foi adicionada a lista.")
 		json.NewEncoder(w).Encode(cachaca)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintln(w, "Os dados de \"id\" e \"nome\" devem ser informados !")
+		fmt.Fprintln(w, "Os dados de \"nome\", \"volume\" e \"custo\" devem ser informados !")
 	}
 }
 
@@ -120,33 +139,60 @@ func renouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: renouvelerCachaca")
 	w.Header().Set("Content-Type", "application/json")
 
+	db := PostgresConn()
+	defer db.Close()
+
 	vars := mux.Vars(r)
 	cle := vars["id"]
-	reqBody, _ := ioutil.ReadAll(r.Body)
-	var update_cachaca Cachaca
+	reqBody, erro := ioutil.ReadAll(r.Body)
+	if erro != nil {
+		panic(erro)
+	}
 
-	json.Unmarshal(reqBody, &update_cachaca)
-
-	cachacaencontra := false
+	var new_cachaca Cachaca
+	var cachaca Cachaca
+	json.Unmarshal(reqBody, &new_cachaca)
 
 	if cle != "" {
-		// Buscar na lista de cachacas o Id informado
-		for index, cachaca := range Cachacas {
-			if strings.ToLower(cachaca.Id) == strings.ToLower(cle) {
-				cachacaencontra = true
+		db.Find(&cachaca, cle)
 
-				// Atualizar informações da cachaca na lista
-				Cachacas[index] = update_cachaca
+		if cachaca.ID != 0 {
+			fmt.Println(
+				"Dados encontrados", 
+				cachaca.ID,
+				cachaca.Nome, 
+				cachaca.Volume,
+				cachaca.Custo,
+			)
 
-				fmt.Fprintln(w, "A cachaca com Id \""+cle+"\" foi aualizada.")
+			if new_cachaca.Nome != "" {
+				cachaca.Nome = new_cachaca.Nome
 			}
-		}
-		// Mensagem padrão para consula vazia
-		if cachacaencontra != true {
-			fmt.Println("Nenhuma cachaca encontrada com o Id: \"" + cle + "\"")
+
+			if new_cachaca.Volume != "" {
+				cachaca.Volume = new_cachaca.Volume
+			}
+
+			if new_cachaca.Custo != "" {
+				cachaca.Custo = new_cachaca.Custo
+			}
+
+			fmt.Println(
+				"Dados atualizados", 
+				cachaca.ID,
+				cachaca.Nome, 
+				cachaca.Volume, 
+				cachaca.Custo, 
+			)
+			json.NewEncoder(w).Encode(cachaca)
+			db.Save(&cachaca)
+
+		} else {
 			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintln(w, "Nenhuma cachaca encontrada com o Id: \""+cle+"\"")
+			fmt.Println("Nenhuma cachaca encontrada com o Id:", cle)
+			fmt.Fprintln(w, "Nenhuma cachaca encontrada com o Id:", cle)
 		}
+
 	} else {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintln(w, "O dado de ID deve ser preenchido !")
@@ -159,26 +205,32 @@ func effacerCachaca(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint: effacerCachaca")
 	w.Header().Set("Content-Type", "application/json")
 
+	db := PostgresConn()
+	defer db.Close()
+
 	vars := mux.Vars(r)
-	cle := vars["nome"]
-	cachacaencontra := false
+	cle := vars["id"]
+	
+	var cachaca Cachaca
 
-	// Buscar na lista de cachacas o nome informado
-	for index, cachaca := range Cachacas {
-		if strings.ToLower(cachaca.Nome) == strings.ToLower(cle) {
-			cachacaencontra = true
+	if cle != "" {
+		db.Find(&cachaca, cle)
 
-			// Remover a cachaca informada da lista
-			Cachacas = append(Cachacas[:index], Cachacas[index+1:]...)
+		if cachaca.ID != 0 {
+			fmt.Println("Consumidor ID", cachaca.ID, "deletada ! ")
+			fmt.Fprintln(w, "Consumidor ID", cachaca.ID, "deletada ! ")
+			db.Delete(&cachaca)
 
-			fmt.Fprintln(w, "A cachaca \""+cle+"\" foi removida da lista.")
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Println("Nenhuma cachaca encontrada com o Id:", cle )
+			fmt.Fprintln(w, "Nenhuma cachaca encontrada com o Id:", cle)
 		}
-	}
-	// Mensagem padrão para consula vazia
-	if cachacaencontra != true {
-		fmt.Println("Nenhuma cachaca encontrada com o nome: \"" + cle + "\"")
+
+	} else {
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintln(w, "Nenhuma cachaca encontrada com o nome: \""+cle+"\"")
+		fmt.Println("O dado de ID deve ser preenchido !")
+		fmt.Fprintln(w, "O dado de ID deve ser preenchido !")
 	}
 }
 
@@ -195,9 +247,42 @@ func toutesConsumidores(w http.ResponseWriter, r *http.Request) {
 	db.Find(&consumidores)
 
 	for _, consu := range consumidores {
-		fmt.Println("Nome: ", consu.Nome, "Idade: ", consu.Idade)
+		fmt.Println("Id", consu.ID, "Nome: ", consu.Nome, "Idade: ", consu.Idade)
 	}
 	json.NewEncoder(w).Encode(consumidores)
+}
+
+// uneConsumidor é o endpoint para listar um consumidor buscando pelo nome informado na URL
+func uneConsumidor(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint: uneConsumidor")
+	w.Header().Set("Content-Type", "application/json")
+
+	db := PostgresConn()
+	defer db.Close()
+
+	vars := mux.Vars(r)
+	cle := vars["id"]
+
+	var consumidor Consumidor
+
+	if cle != "" {
+		db.Find(&consumidor, cle)
+
+		if consumidor.ID != 0 {
+			fmt.Println("Selecionado consumidor com Id", cle)
+			json.NewEncoder(w).Encode(consumidor)
+
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Println("Nenhum consumidor encontrado com o Id:", cle)
+			fmt.Fprintln(w, "Nenhum consumidor encontrado com o Id:", cle)
+		}
+
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Println("O dado de ID deve ser informado !")
+		fmt.Fprintln(w, "O dado de ID deve ser informado !")
+	}
 }
 
 // nouvelleConsumidor é o endpoint para adicionar um novo registro de consumidor
@@ -218,7 +303,7 @@ func nouvelleConsumidor(w http.ResponseWriter, r *http.Request) {
 	// Validar dados basicos antes de adicionar
 	if consumidor.Nome != "" && consumidor.Idade != "" {
 		db.Create(&Consumidor{Nome: consumidor.Nome, Idade: consumidor.Idade})
-		fmt.Fprintln(w, "O consumidor \""+consumidor.Nome+"\" foi adicionado a lista.")
+		fmt.Fprintln(w, "O consumidor ", consumidor.Nome, " foi adicionado a lista.")
 		json.NewEncoder(w).Encode(consumidor)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
@@ -245,13 +330,16 @@ func renouvelleConsumidor(w http.ResponseWriter, r *http.Request) {
 	var consumidor Consumidor
 	json.Unmarshal(reqBody, &new_consumidor)
 
-	// consumidorencontrado := False
-
 	if cle != "" {
 		db.Find(&consumidor, cle)
 
 		if consumidor.ID != 0 {
-			fmt.Println("Dados encontrador", consumidor.Nome, consumidor.ID)
+			fmt.Println(
+				"Dados encontrador", 
+				consumidor.ID,
+				consumidor.Nome, 
+				consumidor.Idade,
+			)
 
 			if new_consumidor.Nome != "" {
 				consumidor.Nome = new_consumidor.Nome
@@ -261,22 +349,26 @@ func renouvelleConsumidor(w http.ResponseWriter, r *http.Request) {
 				consumidor.Idade = new_consumidor.Idade
 			}
 
-			fmt.Println("Dados atualizados", consumidor.Nome, consumidor.ID)
+			fmt.Println(
+				"Dados atualizados", 
+				consumidor.ID,
+				consumidor.Nome,
+				consumidor.Idade, 
+			)
 			json.NewEncoder(w).Encode(consumidor)
 			db.Save(&consumidor)
 
 		} else {
-			fmt.Println("Nenhum consumidor encontrado com o Id:", "\""+cle+"\"")
 			w.WriteHeader(http.StatusNotFound)
+			fmt.Println("Nenhum consumidor encontrado com o Id:", "\""+cle+"\"")
 			fmt.Fprintln(w, "Nenhum consumidor encontrado com o Id: \""+cle+"\"")
 		}
 
 	} else {
-		fmt.Println("O dado de ID deve ser preenchido !")
 		w.WriteHeader(http.StatusNotFound)
+		fmt.Println("O dado de ID deve ser preenchido !")
 		fmt.Fprintln(w, "O dado de ID deve ser preenchido !")
 	}
-
 }
 
 // effacerConsumidor é o endpoint para deletar um registro de consumidor
@@ -292,8 +384,6 @@ func effacerConsumidor(w http.ResponseWriter, r *http.Request) {
 
 	var consumidor Consumidor
 
-	// consumidorencontrado := False
-
 	if cle != "" {
 		db.Find(&consumidor, cle)
 
@@ -303,51 +393,16 @@ func effacerConsumidor(w http.ResponseWriter, r *http.Request) {
 			db.Delete(&consumidor)
 
 		} else {
-			fmt.Println("Nenhum consumidor encontrado com o Id:", "\""+cle+"\"")
 			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintln(w, "Nenhum consumidor encontrado com o Id: \""+cle+"\"")
+			fmt.Println("Nenhum consumidor encontrado com o Id:", cle)
+			fmt.Fprintln(w, "Nenhum consumidor encontrado com o Id:", cle)
 		}
 
 	} else {
-		fmt.Println("O dado de ID deve ser preenchido !")
 		w.WriteHeader(http.StatusNotFound)
+		fmt.Println("O dado de ID deve ser preenchido !")
 		fmt.Fprintln(w, "O dado de ID deve ser preenchido !")
 	}
-
-}
-
-// uneConsumidor é o endpoint para listar um consumidor buscando pelo nome informado na URL
-func uneConsumidor(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Endpoint: uneConsumidor")
-	w.Header().Set("Content-Type", "application/json")
-
-	db := PostgresConn()
-	defer db.Close()
-
-	vars := mux.Vars(r)
-	cle := vars["id"]
-
-	var consumidor Consumidor
-
-	if cle != "" {
-		db.Find(&consumidor, cle)
-
-		if consumidor.ID != 0 {
-			fmt.Println("Selecionado consumidor com Id", cle)
-			json.NewEncoder(w).Encode(consumidor)
-
-		} else {
-			fmt.Println("Nenhum consumidor encontrado com o Id:", "\""+cle+"\"")
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintln(w, "Nenhum consumidor encontrado com o Id: \""+cle+"\"")
-		}
-
-	} else {
-		fmt.Println("O dado de ID deve ser informado !")
-		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintln(w, "O dado de ID deve ser informado !")
-	}
-
 }
 
 // initialeMigration é a função para executar a migração no banco
@@ -359,7 +414,12 @@ func initialeMigration() {
 	db.DropTable(&Consumidor{})
 	db.AutoMigrate(&Consumidor{})
 
-	// Inserção de dados para teste
+	// Inserção de dados de cachaças para teste
+	db.Create(&Cachaca{Nome: "51", Volume: "974ml", Custo: "10"})
+	db.Create(&Cachaca{Nome: "Matuta", Volume: "1000ml", Custo: "30"})
+	db.Create(&Cachaca{Nome: "Carangueijo", Volume: "1000ml", Custo: "25"})
+
+	// Inserção de dados de consumidores para teste
 	db.Create(&Consumidor{Nome: "felix marmotinha", Idade: "18"})
 	db.Create(&Consumidor{Nome: "felix-2-devops", Idade: "33"})
 	db.Create(&Consumidor{Nome: "jorbson-2-scripts", Idade: "21"})
@@ -367,6 +427,7 @@ func initialeMigration() {
 	db.Create(&Consumidor{Nome: "Nicer", Idade: "1"})
 	db.Create(&Consumidor{Nome: "Ezy", Idade: "2"})
 	db.Delete(&Consumidor{}, 1)
+	
 }
 
 // PostgresConn tenta conectar e retornar uma conexão ao banco de dados postgres com retry
@@ -424,8 +485,8 @@ func debut() {
 	roteur.HandleFunc("/v1/toutescachacas", toutesCachacas)
 	roteur.HandleFunc("/v1/unecachaca", nouvelleCachaca).Methods("POST")
 	roteur.HandleFunc("/v1/unecachaca/{id}", renouvelleCachaca).Methods("PUT")
-	roteur.HandleFunc("/v1/unecachaca/{nome}", effacerCachaca).Methods("DELETE")
-	roteur.HandleFunc("/v1/unecachaca/{nome}", uneCachaca)
+	roteur.HandleFunc("/v1/unecachaca/{id}", effacerCachaca).Methods("DELETE")
+	roteur.HandleFunc("/v1/unecachaca/{id}", uneCachaca)
 	
 	// Rotas de endpoints dos consmidores
 	roteur.HandleFunc("/v1/toutesconsumidores", toutesConsumidores)
@@ -444,12 +505,19 @@ func debut() {
 	log.Fatal(http.ListenAndServe(api_port, roteur))
 }
 
-// Cachaca é a estrutura base para o projeto cachaça
+// Cachaca é a estrutura base para a tabela "cachacas" no banco
 type Cachaca struct {
-	Id     string `json:"id"`
-	Nome   string `json:"nome"`
-	Volume string `json:"volume"`
-	Custo  string `json:"custo"`
+	gorm.Model
+	Nome   string
+	Volume string
+	Custo  string
+}
+
+// Consumidor é a estrutura base para a tabela "consumidors" no banco
+type Consumidor struct {
+	gorm.Model
+	Nome  string
+	Idade string
 }
 
 // Endpoint é a estrutura base para o projeto cachaça
@@ -459,12 +527,5 @@ type Cachaca struct {
 // 	Versao 	string
 // 	Metodo  string
 // }
-
-// Consumidor é a estrutura base para a tabela "consumidors" no banco
-type Consumidor struct {
-	gorm.Model
-	Nome  string
-	Idade string
-}
 
 var Cachacas []Cachaca
