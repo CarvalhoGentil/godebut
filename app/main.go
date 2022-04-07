@@ -411,8 +411,12 @@ func effacerConsumidor(w http.ResponseWriter, r *http.Request) {
 func initialeMigration() {
 
 	db := PostgresConn()
+
+	// Limpeza de dados anteriores
 	db.DropTable(&Consumidor{})
 	db.AutoMigrate(&Consumidor{})
+	db.DropTable(&Cachaca{})
+	db.AutoMigrate(&Cachaca{})
 
 	// Inserção de dados de cachaças para teste
 	db.Create(&Cachaca{Nome: "51", Volume: "974ml", Custo: "10"})
@@ -427,7 +431,6 @@ func initialeMigration() {
 	db.Create(&Consumidor{Nome: "Nicer", Idade: "1"})
 	db.Create(&Consumidor{Nome: "Ezy", Idade: "2"})
 	db.Delete(&Consumidor{}, 1)
-	
 }
 
 // PostgresConn tenta conectar e retornar uma conexão ao banco de dados postgres com retry
