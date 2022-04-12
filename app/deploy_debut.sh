@@ -22,7 +22,7 @@ fi
 HASHLINE="##############################################"
 
 echo $HASHLINE
-echo "Removendo stack godebut_dev para liberar as portas..."
+echo "Removendo stack $stack_name para liberar as portas..."
 docker stack rm $stack_name
 echo $HASHLINE
 echo " "
@@ -45,7 +45,7 @@ echo " "
 docker build -t ffelixneto/$stack_name:latest .
 # NO CACHE
 # docker build --no-cache -t ffelixneto/$stack_name:latest .
-
+sleep 1
 
 echo $HASHLINE
 echo "Iniciando o serviço $stack_name..."
@@ -54,7 +54,7 @@ echo " "
 
 docker stack deploy $stack_name -c docker-compose_dev.yml
 
-sleep 2
+sleep 4
 
 echo $HASHLINE
 echo "GoDebut $environment deploy finalizado !"

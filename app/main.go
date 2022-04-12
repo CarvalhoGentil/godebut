@@ -165,18 +165,14 @@ func renouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 				cachaca.Custo,
 			)
 
-			if new_cachaca.Nome != "" {
-				cachaca.Nome = new_cachaca.Nome
-			}
+			db.Model(&cachaca).Updates(
+				Cachaca{
+					Nome: new_cachaca.Nome,	
+					Volume : new_cachaca.Volume, 
+					Custo : new_cachaca.Custo,
+				})
 
-			if new_cachaca.Volume != "" {
-				cachaca.Volume = new_cachaca.Volume
-			}
-
-			if new_cachaca.Custo != "" {
-				cachaca.Custo = new_cachaca.Custo
-			}
-
+			db.Find(&cachaca, cle)
 			fmt.Println(
 				"Dados atualizados", 
 				cachaca.ID,
@@ -185,7 +181,6 @@ func renouvelleCachaca(w http.ResponseWriter, r *http.Request) {
 				cachaca.Custo, 
 			)
 			json.NewEncoder(w).Encode(cachaca)
-			db.Save(&cachaca)
 
 		} else {
 			w.WriteHeader(http.StatusNotFound)
@@ -341,14 +336,13 @@ func renouvelleConsumidor(w http.ResponseWriter, r *http.Request) {
 				consumidor.Idade,
 			)
 
-			if new_consumidor.Nome != "" {
-				consumidor.Nome = new_consumidor.Nome
-			}
-
-			if new_consumidor.Idade != "" {
-				consumidor.Idade = new_consumidor.Idade
-			}
-
+			db.Model(&consumidor).Updates(
+				Consumidor{
+					Nome: new_consumidor.Nome,	
+					Idade : new_consumidor.Idade,
+				})
+			
+			db.Find(&consumidor, cle)
 			fmt.Println(
 				"Dados atualizados", 
 				consumidor.ID,
@@ -356,7 +350,6 @@ func renouvelleConsumidor(w http.ResponseWriter, r *http.Request) {
 				consumidor.Idade, 
 			)
 			json.NewEncoder(w).Encode(consumidor)
-			db.Save(&consumidor)
 
 		} else {
 			w.WriteHeader(http.StatusNotFound)
@@ -438,7 +431,6 @@ func initialeMigration() {
 func PostgresConn() *gorm.DB {
 	var db *gorm.DB
 	var err error
-	fmt.Println("Capturando variaveis de ambiente para conectar ao banco de dados...")
 
 	db_host := environ.GetEnvironValue("DB_HOST")
 	db_user := environ.GetEnvironValue("DB_USER")
